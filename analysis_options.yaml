@@ -5,3 +5,27 @@ analyzer:
     - build/**
     - android/**
     - ios/**
+  errors:
+    missing_required_argument: error
+    invalid_null_aware_operator: error
+ 
+linter:
+  rules:
+    - cancel_subscriptions
+    - unawaited_futures
+    - discarded_futures
+    - only_throw_errors
+    - avoid_dynamic_calls
+    - avoid_print
+    - prefer_single_quotes
+    - always_put_required_named_parameters_first
+    - avoid_empty_else
+    - avoid_unnecessary_containers
+    - avoid_positional_boolean_parameters
+    - prefer_const_constructors
+    - use_enums
+    - use_colored_box
+    - use_decorated_box
+    - sized_box_for_whitespace
+    - lines_longer_than_80_chars
+    - always_declare_return_types
