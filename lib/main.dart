@@ -7,12 +7,10 @@ void main() {
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
 
-  static const DEFAULT_GREETING = 'Hello World!';
-
   @override
   Widget build(BuildContext context) {
     return const MaterialApp(
-      home: Scaffold(body: Center(child: Text(DEFAULT_GREETING))),
+      home: Scaffold(body: Center(child: Text('Hello World!'))),
     );
   }
 }
