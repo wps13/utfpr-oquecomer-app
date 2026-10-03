@@ -30,4 +30,19 @@ jobs:
         run: dart format --output=none --set-exit-if-changed .
 
       - name: Analyze code
-        run: flutter analyze --fatal-infos --fatal-warnings
+        shell: bash
+        run: |
+          echo "::add-matcher::.github/flutter-analyze-matcher.json"
+          set +e
+          flutter --no-color analyze --no-pub --fatal-infos --fatal-warnings 2>&1 | tee "$RUNNER_TEMP/flutter-analyze.log"
+          analysis_exit=${PIPESTATUS[0]}
+          set -e
+          {
+            echo '### Flutter analysis'
+            echo
+            echo '```text'
+            cat "$RUNNER_TEMP/flutter-analyze.log"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          echo "::remove-matcher owner=flutter-analyze::"
+          exit "$analysis_exit"

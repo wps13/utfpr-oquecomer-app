@@ -1,0 +1,18 @@
+{
+  "problemMatcher": [
+    {
+      "owner": "flutter-analyze",
+      "severity": "error",
+      "pattern": [
+        {
+          "regexp": "^\\s*(?:info|warning|error)\\s+[•-]\\s+(.+?)\\s+[•-]\\s+(.+):(\\d+):(\\d+)\\s+[•-]\\s+(\\S+)\\s*$",
+          "message": 1,
+          "file": 2,
+          "line": 3,
+          "column": 4,
+          "code": 5
+        }
+      ]
+    }
+  ]
+}
