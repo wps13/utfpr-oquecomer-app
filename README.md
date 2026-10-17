@@ -110,3 +110,20 @@ O projeto segue o padrão MVVM, como recomendado na documentação oficial.
 - Data: responsável por manipular os dados, sejam recebidos de apis externas ou não, sendo a fonte da verdade, os dados daqui vão para a UI, usando os modelos do Domain.
 
 ![Diagrama](assets/diagrama_arquitetura.png)
+
+## Convenções de estado
+
+O estado do app usa `provider` com `ChangeNotifier` como base das ViewModels.
+A `FavoritesViewModel` (`lib/ui/favorites/`) é o exemplo a ser seguido.
+
+- Cada tela ou fluxo tem a sua própria ViewModel.
+- Widgets não chamam API, banco local ou LLM. Isso é feito pelos repositórios, usados pela ViewModel.
+- Os repositórios são injetados pelo construtor da ViewModel.
+- A ViewModel é criada com `ChangeNotifierProvider(create: ...)`, nunca dentro do `build`.
+- Providers globais (repositórios e serviços) ficam declarados no topo do app, acima do `MaterialApp` (ou `MaterialApp.router`, quando as rotas forem configuradas).
+- `context.watch` só é usado dentro do `build`; em callbacks use `context.read`.
+- `notifyListeners()` é chamado sempre que o estado mudar, mas nunca durante o `build`.
+- Carregamentos iniciais são disparados no `initState` ou em um callback.
+- Estado efêmero de UI (aba selecionada, campo de texto, chips em edição) fica em `StatefulWidget`. Só o estado compartilhado entre telas vai para ViewModel.
+- Operações assíncronas usam estado explícito, com o enum `ViewState` (`loading`, `success`, `error`).
+- Testes de ViewModel rodam sem renderizar widgets, com repositórios falsos de `testing/fakes/`.
