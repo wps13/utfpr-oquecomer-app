@@ -110,3 +110,15 @@ O projeto segue o padrão MVVM, como recomendado na documentação oficial.
 - Data: responsável por manipular os dados, sejam recebidos de apis externas ou não, sendo a fonte da verdade, os dados daqui vão para a UI, usando os modelos do Domain.
 
 ![Diagrama](assets/diagrama_arquitetura.png)
+
+## Configuração de chaves e URLs
+
+Chaves e URLs não ficam no código. Copie `env.example.json` para `env.json`
+(ignorado pelo Git) e rode:
+
+```bash
+flutter run --dart-define-from-file=env.json
+```
+
+Variáveis: `CATALOG_BASE_URL`, `GEMINI_BASE_URL`, `GEMINI_API_KEY`.
+Os logs de requisição só são habilitados em modo debug.
