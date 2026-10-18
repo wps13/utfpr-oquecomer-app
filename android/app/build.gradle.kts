@@ -6,7 +6,8 @@ plugins {
 
 android {
     namespace = "com.example.o_que_comer_app"
-    compileSdk = flutter.compileSdkVersion
+    // Requisito do permission_handler_android; não altera o targetSdk.
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

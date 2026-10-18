@@ -2,6 +2,10 @@
 
 Projeto Flutter para o app 'O que Comer'.
 
+Configuração e uso do serviço de permissões: [APP-23 / TT14](docs/permissoes.md).
+
+Preparação do Xcode e execução no iOS: [guia de desenvolvimento](docs/desenvolvimento-ios.md).
+
 ## Convenções de Git
 
 ### Commits

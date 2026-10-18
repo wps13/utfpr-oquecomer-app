@@ -8,6 +8,8 @@ import 'config/env.dart';
 import 'data/repositories/favorites_repository.dart';
 import 'data/services/api/api_client.dart';
 import 'data/services/crash/error_reporter.dart';
+import 'data/services/permissions/permission_handler_service.dart';
+import 'data/services/permissions/permission_service.dart';
 import 'ui/core/themes/theme.dart';
 import 'ui/favorites/view_models/favorites_viewmodel.dart';
 import 'ui/favorites/widgets/favorites_screen.dart';
@@ -33,6 +35,7 @@ void main() {
       providers: [
         Provider<Env>.value(value: env),
         Provider<ErrorReporter>.value(value: reporter),
+        Provider<PermissionService>(create: (_) => PermissionHandlerService()),
         Provider<CatalogApiClient>(
           create: (c) => CatalogApiClient(env, c.read<ErrorReporter>()),
         ),
