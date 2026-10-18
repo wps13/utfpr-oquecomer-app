@@ -127,3 +127,14 @@ A `FavoritesViewModel` (`lib/ui/favorites/`) é o exemplo a ser seguido.
 - Estado efêmero de UI (aba selecionada, campo de texto, chips em edição) fica em `StatefulWidget`. Só o estado compartilhado entre telas vai para ViewModel.
 - Operações assíncronas usam estado explícito, com o enum `ViewState` (`loading`, `success`, `error`).
 - Testes de ViewModel rodam sem renderizar widgets, com repositórios falsos de `testing/fakes/`.
+## Configuração de chaves e URLs
+
+Chaves e URLs não ficam no código. Copie `env.example.json` para `env.json`
+(ignorado pelo Git) e rode:
+
+```bash
+flutter run --dart-define-from-file=env.json
+```
+
+Variáveis: `CATALOG_BASE_URL`, `GEMINI_BASE_URL`, `GEMINI_API_KEY`.
+Os logs de requisição só são habilitados em modo debug.
