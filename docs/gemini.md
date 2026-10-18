@@ -25,8 +25,16 @@ Confira a regra sem exibir o conteúdo:
 
 ```sh
 git check-ignore config/gemini.local.json
-flutter run --dart-define-from-file=config/gemini.local.json
+flutter run \
+  --dart-define-from-file=config/firebase.local.json \
+  --dart-define-from-file=config/gemini.local.json
 ```
+
+Prepare também `config/firebase.local.json` conforme a
+[configuração Firebase do APP-19](firebase-crashlytics.md#variáveis-de-compilação).
+O app inicializa o Firebase, por isso recebe os dois arquivos. Os testes unitários
+e o teste manual isolado do Gemini não inicializam o Firebase e continuam sem
+exigir esse arquivo adicional.
 
 O app ainda não possui a tela de IA. Esse comando apenas fornece a configuração;
 o teste manual abaixo é o caminho para validar chamadas reais neste card.
@@ -153,7 +161,7 @@ erros; não comprovam a qualidade de identificação/receita do modelo real.
 
 ## Validação realizada
 
-- Formatação e análise estática sem problemas; suíte com 59 testes passando,
+- Formatação e análise estática sem problemas; suíte com 66 testes passando,
   incluindo 47 testes adicionados no APP-31.
 - Geração de receita e identificação de alimentos por foto validadas com a API
   real pelo teste manual, usando a configuração local do desenvolvedor.

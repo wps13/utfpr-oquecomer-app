@@ -19,21 +19,72 @@ dart pub global activate flutterfire_cli
 flutter pub get
 flutterfire configure --project=oquecomer-app --platforms=android,ios \
   --android-package-name=br.edu.utfpr.oquecomer \
-  --ios-bundle-id=br.edu.utfpr.oquecomer
+  --ios-bundle-id=br.edu.utfpr.oquecomer \
+  --out=config/firebase.generated.local.dart
 ```
 
 A CLI FlutterFire precisa estar no `PATH`, inclusive para o envio dos símbolos
 durante builds iOS. Ela usa a biblioteca Ruby `xcodeproj` para editar o projeto
 Xcode. O projeto usa Swift Package Manager para as dependências nativas iOS.
 
-Os arquivos `android/app/google-services.json`,
-`ios/Runner/GoogleService-Info.plist`, `lib/firebase_options.dart` e `firebase.json`
-contêm a configuração pública dos apps. Eles podem ser versionados; não são
-credenciais administrativas. Não versione tokens da CLI ou chaves JSON de contas
-de serviço. Os logs locais e padrões comuns de contas de serviço estão no
-`.gitignore`.
+O parâmetro `--out` direciona a saída Dart da CLI para um arquivo temporário
+ignorado pelo Git. `lib/firebase_options.dart` é mantido pelo projeto e lê as
+variáveis de compilação usando `String.fromEnvironment`.
+
+Os arquivos nativos `android/app/google-services.json`,
+`ios/Runner/GoogleService-Info.plist` e os metadados `firebase.json` continuam
+versionados. Eles contêm a configuração pública dos apps, utilizada pelos SDKs
+nativos e pelo envio dos símbolos; não são credenciais administrativas. A
+parametrização do Dart organiza a configuração por ambiente e não torna os
+identificadores secretos no aplicativo compilado. Não versione tokens da CLI
+ou chaves JSON de contas de serviço.
 
 Não foram adicionados Analytics, Performance Monitoring ou Remote Config.
+
+### Variáveis de compilação
+
+Na raiz do projeto, crie o arquivo local a partir do exemplo:
+
+```sh
+cp config/firebase.example.json config/firebase.local.json
+```
+
+Preencha os valores correspondentes ao mesmo projeto e aos mesmos registros dos
+arquivos nativos. `config/*.local.json` está no `.gitignore`:
+
+| Variável | Origem |
+| --- | --- |
+| `FIREBASE_ANDROID_API_KEY` | JSON Android: `client[].api_key[].current_key` |
+| `FIREBASE_ANDROID_APP_ID` | JSON Android: `client[].client_info.mobilesdk_app_id` |
+| `FIREBASE_IOS_API_KEY` | Plist iOS: `API_KEY` |
+| `FIREBASE_IOS_APP_ID` | Plist iOS: `GOOGLE_APP_ID` |
+| `FIREBASE_MESSAGING_SENDER_ID` | JSON Android: `project_info.project_number` |
+| `FIREBASE_PROJECT_ID` | JSON Android: `project_info.project_id` |
+| `FIREBASE_STORAGE_BUCKET` | JSON Android: `project_info.storage_bucket` |
+| `FIREBASE_IOS_BUNDLE_ID` | Plist iOS: `BUNDLE_ID` |
+
+No JSON Android, selecione o cliente cujo pacote corresponde ao app. Os campos
+obrigatórios são validados apenas para a plataforma executada; o bucket é
+opcional, pois este card não utiliza Storage. Uma configuração incompleta
+interrompe a inicialização com uma mensagem que lista os nomes das variáveis
+ausentes, sem exibir seus valores.
+
+```sh
+flutter run --dart-define-from-file=config/firebase.local.json
+```
+
+O arquivo não é carregado automaticamente. Passe a flag também ao gerar builds
+e configure o mesmo argumento no IDE ou no pipeline que executa o app.
+Variáveis exportadas no shell precisam ser repassadas por `--dart-define`;
+`String.fromEnvironment` lê declarações de compilação.
+
+Para trocar o projeto Firebase, atualize também os arquivos nativos com a CLI;
+as opções Dart e nativas precisam representar os mesmos apps. A parametrização
+não cria flavors nem troca os arquivos nativos automaticamente.
+
+A análise estática e os testes unitários usam fixtures e não precisam do arquivo
+local. Um pipeline de build/distribuição deve fornecê-lo ou passar os defines
+equivalentes.
 
 ## Política de coleta
 
@@ -94,8 +145,10 @@ explicitamente ao isolate principal quando essas funcionalidades existirem.
 ```sh
 flutter analyze --fatal-infos --fatal-warnings
 flutter test
-flutter build apk --release
-flutter build ios --release --no-codesign
+flutter build apk --release \
+  --dart-define-from-file=config/firebase.local.json
+flutter build ios --release --no-codesign \
+  --dart-define-from-file=config/firebase.local.json
 ```
 
 O último comando valida a compilação iOS sem assinatura. A execução release no
@@ -107,6 +160,7 @@ navegação normal e exige uma flag explícita:
 ```sh
 flutter run --release -d <id-do-dispositivo> \
   --target=tool/crashlytics_smoke_test.dart \
+  --dart-define-from-file=config/firebase.local.json \
   --dart-define=ENABLE_CRASHLYTICS_SMOKE_TEST=true
 ```
 
@@ -129,7 +183,8 @@ Eles não substituem a confirmação do recebimento dos crashes no console.
 
 ## Validação realizada
 
-- Análise estática sem problemas e 12 testes passando.
+- Análise estática sem problemas e testes unitários da política de coleta,
+  handlers e validação de configuração. A suíte do APP-19 tem 19 testes.
 - Android release: erros tratado e Flutter e crash nativo recebidos pelo
   Crashlytics, confirmados pelo relatório `topIssues` da ferramenta oficial.
 - Android debug: coleta nativa desabilitada e nenhum evento recebido no
