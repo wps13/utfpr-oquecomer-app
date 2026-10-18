@@ -7,6 +7,13 @@
 firebase-debug.log*
 firebase-debug.*.log
 .firebase/
+# Configuração local do Gemini (exemplo sem chave pode ser versionado).
+.env
+.env.*
+!.env.example
+config/*.local.json
+# Fotos locais para validação manual do Gemini.
+/local/gemini/
 # Credenciais de CLI/contas de serviço não devem entrar no repositório.
 **/*service-account*.json
 **/*serviceAccount*.json

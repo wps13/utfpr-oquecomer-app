@@ -4,6 +4,8 @@ Projeto Flutter para o app 'O que Comer'.
 
 Configuração, uso e validação do [Firebase e Crashlytics (APP-19)](docs/firebase-crashlytics.md).
 
+Configuração, contratos e testes da [integração Gemini (APP-31)](docs/gemini.md).
+
 ## Convenções de Git
 
 ### Commits
