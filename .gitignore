@@ -7,9 +7,14 @@
 firebase-debug.log*
 firebase-debug.*.log
 .firebase/
-# Configuração Firebase local e saída temporária do FlutterFire.
+# Configuração local de Firebase/Gemini (exemplos vazios são versionados).
+.env
+.env.*
+!.env.example
 config/*.local.json
 config/firebase.generated.local.dart
+# Fotos locais para validação manual do Gemini.
+/local/gemini/
 # Credenciais de CLI/contas de serviço não devem entrar no repositório.
 **/*service-account*.json
 **/*serviceAccount*.json
