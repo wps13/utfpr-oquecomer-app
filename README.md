@@ -6,6 +6,39 @@ Configuração, uso e validação do [Firebase e Crashlytics (APP-19)](docs/fire
 
 Configuração, contratos e testes da [integração Gemini (APP-31)](docs/gemini.md).
 
+## Executar localmente
+
+Na primeira configuração, crie os arquivos locais a partir dos exemplos:
+
+```sh
+flutter pub get
+cp -n config/firebase.example.json config/firebase.local.json
+cp -n config/gemini.example.json config/gemini.local.json
+```
+
+Preencha os valores conforme os guias de [Firebase](docs/firebase-crashlytics.md#variáveis-de-compilação)
+e [Gemini](docs/gemini.md#configuração-local). Se já possui os arquivos preenchidos,
+use-os diretamente. Os arquivos `*.local.json` são ignorados pelo Git.
+
+Com um emulador iniciado ou celular conectado, execute:
+
+```sh
+flutter run \
+  --dart-define-from-file=config/firebase.local.json \
+  --dart-define-from-file=config/gemini.local.json
+```
+
+Para escolher um dispositivo, consulte `flutter devices` e acrescente
+`-d <id-do-dispositivo>` ao comando. Os arquivos não são carregados automaticamente;
+os argumentos precisam ser fornecidos a cada execução ou configurados no IDE.
+
+Os testes unitários e a análise estática não exigem os arquivos locais:
+
+```sh
+flutter analyze
+flutter test
+```
+
 ## Convenções de Git
 
 ### Commits
