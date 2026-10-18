@@ -7,6 +7,9 @@
 firebase-debug.log*
 firebase-debug.*.log
 .firebase/
+# Configuração Firebase local e saída temporária do FlutterFire.
+config/*.local.json
+config/firebase.generated.local.dart
 # Credenciais de CLI/contas de serviço não devem entrar no repositório.
 **/*service-account*.json
 **/*serviceAccount*.json
