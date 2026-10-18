@@ -7,8 +7,10 @@ environment:
   sdk: ^3.13.4
 
 dependencies:
+  device_info_plus: ^13.3.0
   flutter:
     sdk: flutter
+  permission_handler: ^13.0.2
 
 dev_dependencies:
   flutter_test:
