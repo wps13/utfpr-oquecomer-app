@@ -1,11 +1,23 @@
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MainApp());
+import 'config/error_handling.dart';
+import 'config/firebase_bootstrap.dart';
+import 'data/services/errors/error_reporter.dart';
+
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final errorReporter = await initializeErrorReporting();
+  installErrorHandlers(errorReporter: errorReporter);
+  runApp(MainApp(errorReporter: errorReporter));
 }
 
 class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+  const MainApp({
+    this.errorReporter = const DisabledErrorReporter(),
+    super.key,
+  });
+
+  final ErrorReporter errorReporter;
 
   @override
   Widget build(BuildContext context) {

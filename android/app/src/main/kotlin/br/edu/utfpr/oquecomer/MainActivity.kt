@@ -1,4 +1,4 @@
-package com.example.o_que_comer_app
+package br.edu.utfpr.oquecomer
 
 import io.flutter.embedding.android.FlutterActivity
 

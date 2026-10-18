@@ -4,6 +4,12 @@
 *.pyc
 *.swp
 .DS_Store
+firebase-debug.log*
+firebase-debug.*.log
+.firebase/
+# Credenciais de CLI/contas de serviço não devem entrar no repositório.
+**/*service-account*.json
+**/*serviceAccount*.json
 .atom/
 .build/
 .buildlog/
