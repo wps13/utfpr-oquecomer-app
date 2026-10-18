@@ -1,1 +1,139 @@
+import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 
+import 'package:o_que_comer_app/routing/routes.dart';
+import 'package:o_que_comer_app/ui/ai_recipes/widgets/ai_recipes_screen.dart';
+
+import 'package:o_que_comer_app/ui/catalog/widgets/catalog_screen.dart';
+import 'package:o_que_comer_app/ui/favorites/widget/favorites_screen.dart';
+import 'package:o_que_comer_app/ui/hands_free_mode/widgets/hands_free_mode_screen.dart';
+import 'package:o_que_comer_app/ui/home/widgets/home_screen.dart';
+import 'package:o_que_comer_app/ui/inventory/widgets/inventory_screen.dart';
+import 'package:o_que_comer_app/ui/recipe_details/widgets/recipe_details_screen.dart';
+import 'package:o_que_comer_app/ui/search/widgets/search_screen.dart';
+
+final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
+
+final GoRouter router = GoRouter(
+  navigatorKey: _rootNavigatorKey,
+  initialLocation: Routes.home,
+  routes: [
+    ShellRoute(
+      builder: (context, state, child) {
+        return MainShell(child: child);
+      },
+      routes: [
+        GoRoute(
+          path: Routes.home,
+          builder: (context, state) {
+            return const HomeScreen();
+          },
+        ),
+        GoRoute(
+          path: Routes.aiRecipe,
+          builder: (context, state) {
+            return const AiRecipesScreen();
+          },
+        ),
+        GoRoute(
+          path: Routes.inventory,
+          builder: (context, state) {
+            return const InventoryScreen();
+          },
+        ),
+        GoRoute(
+          path: Routes.search,
+          builder: (context, state) {
+            return const SearchScreen();
+          },
+        ),
+        GoRoute(
+          path: Routes.favorites,
+          builder: (context, state) {
+            return const FavoritesScreen();
+          },
+        ),
+      ],
+    ),
+    GoRoute(
+      path: Routes.catalog,
+      builder: (context, state) {
+        return const CatalogScreen();
+      },
+    ),
+    GoRoute(
+      path: Routes.recipes,
+      redirect: (context, state) {
+        if (state.uri.path == Routes.recipes) {
+          return Routes.recipeDetails('1');
+        }
+        return null;
+      },
+      routes: [
+        GoRoute(
+          path: ':id',
+          builder: (context, state) {
+            return const RecipeDetailsScreen();
+          },
+          routes: [
+            GoRoute(
+              path: 'hands-free',
+              builder: (context, state) {
+                return const HandsFreeModeScreen();
+              },
+            ),
+          ],
+        ),
+      ],
+    ),
+  ],
+);
+
+class MainShell extends StatelessWidget {
+  const MainShell({required this.child, super.key});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final location = GoRouterState.of(context).uri.path;
+
+    return Scaffold(
+      bottomNavigationBar: NavigationBar(
+        selectedIndex: switch (location) {
+          Routes.search => 1,
+          Routes.favorites => 2,
+          _ => 0,
+        },
+        onDestinationSelected: (index) {
+          switch (index) {
+            case 0:
+              context.go(Routes.home);
+            case 1:
+              context.go(Routes.search);
+            case 2:
+              context.go(Routes.favorites);
+          }
+        },
+        destinations: const [
+          NavigationDestination(
+            icon: Icon(Icons.home_outlined),
+            selectedIcon: Icon(Icons.home),
+            label: 'Início',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.search_outlined),
+            selectedIcon: Icon(Icons.search),
+            label: 'Buscar',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.favorite_outline),
+            selectedIcon: Icon(Icons.favorite),
+            label: 'Favoritos',
+          ),
+        ],
+      ),
+      body: child,
+    );
+  }
+}

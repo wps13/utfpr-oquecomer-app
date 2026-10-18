@@ -5,6 +5,7 @@ abstract final class Routes {
   static const catalog = '/catalogo';
   static const inventory = '/despensa';
   static const aiRecipe = '/ia';
+  static const recipes = '/receitas';
   static String recipeDetails(String id) => '/receitas/$id';
   static String handsFreeMode(String id) => '/receitas/$id/hands-free';
 }

@@ -5,6 +5,6 @@ class AiRecipesScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: Text('AI Recipe Screen')));
+    return const Scaffold(body: Center(child: Text('Receitas com IA')));
   }
 }
