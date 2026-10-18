@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:o_que_comer_app/data/repositories/favorites_repository.dart';
 import 'package:o_que_comer_app/data/services/permissions/permission_service.dart';
 import 'package:o_que_comer_app/domain/models/app_permission.dart';
 import 'package:o_que_comer_app/main.dart';
 import 'package:o_que_comer_app/ui/core/ui/permission_action.dart';
 import 'package:o_que_comer_app/ui/core/view_models/permission_viewmodel.dart';
+import 'package:provider/provider.dart';
 
 class FakePermissionService implements PermissionService {
   PermissionAccess status = PermissionAccess.denied;
@@ -67,9 +69,22 @@ void main() {
   }
 
   testWidgets('app starts without a native permission request', (tester) async {
-    await tester.pumpWidget(const MainApp());
+    await tester.pumpWidget(
+      MultiProvider(
+        providers: [
+          Provider<FavoritesRepository>(
+            create: (_) => InMemoryFavoritesRepository(),
+          ),
+          Provider<PermissionService>.value(value: service),
+        ],
+        child: const MainApp(),
+      ),
+    );
     await tester.pumpAndSettle();
-    expect(find.text('Hello World!'), findsOneWidget);
+    expect(find.text('Favoritos'), findsOneWidget);
+    expect(service.checks, 0);
+    expect(service.requests, 0);
+    expect(service.settingsCalls, 0);
     expect(tester.takeException(), isNull);
   });
 

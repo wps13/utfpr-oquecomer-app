@@ -12,12 +12,13 @@ quanto após uma recusa permanente; somente `request` distingue esses casos.
 
 ## Uso em uma funcionalidade
 
-Crie o serviço na composição das dependências e injete-o na ViewModel:
+O serviço está registrado no `MultiProvider` do `main`, seguindo o padrão da
+`develop`. A instância compartilhada é criada sob demanda e não solicita acesso
+ao ser criada. Injete a interface na ViewModel a partir do Provider:
 
 ```dart
-final permissionService = PermissionHandlerService();
 final permissionViewModel = PermissionViewModel(
-  permissionService: permissionService,
+  permissionService: context.read<PermissionService>(),
 );
 ```
 
