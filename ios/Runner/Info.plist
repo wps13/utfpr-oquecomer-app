@@ -26,6 +26,8 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>FirebaseCrashlyticsCollectionEnabled</key>
+	<string>$(CRASHLYTICS_COLLECTION_ENABLED)</string>
 	<key>NSCameraUsageDescription</key>
 	<string>O Que Comer App precisa acessar a câmera para tirar fotos quando você usar esse recurso.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>

@@ -1,0 +1,30 @@
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "oquecomer-app",
+          "appId": "1:578452232840:android:5a005047e0a1f4ad325d3d",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "ios": {
+        "default": {
+          "projectId": "oquecomer-app",
+          "appId": "1:578452232840:ios:5c63c3e47d39bfa3325d3d",
+          "uploadDebugSymbols": true,
+          "fileOutput": "ios/Runner/GoogleService-Info.plist"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "oquecomer-app",
+          "configurations": {
+            "android": "1:578452232840:android:5a005047e0a1f4ad325d3d",
+            "ios": "1:578452232840:ios:5c63c3e47d39bfa3325d3d"
+          }
+        }
+      }
+    }
+  }
+}

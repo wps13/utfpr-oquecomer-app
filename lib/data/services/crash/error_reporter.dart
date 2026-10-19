@@ -7,9 +7,8 @@ abstract interface class ErrorReporter {
 
 /// Implementação padrão: apenas registra no console em debug.
 ///
-/// TODO(App-20): trocar por uma implementação com `firebase_crashlytics`
-/// assim que o projeto Firebase (google-services.json /
-/// GoogleService-Info.plist) estiver configurado.
+/// O app fornece HttpErrorReporter via Provider para encaminhar os erros ao
+/// destino inicializado no APP-19. Esta implementação serve para uso isolado.
 class DebugErrorReporter implements ErrorReporter {
   const DebugErrorReporter();
 

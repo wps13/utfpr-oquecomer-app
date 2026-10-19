@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "578452232840",
+    "project_id": "oquecomer-app",
+    "storage_bucket": "oquecomer-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:578452232840:android:5a005047e0a1f4ad325d3d",
+        "android_client_info": {
+          "package_name": "br.edu.utfpr.oquecomer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBEgtbSUFUsYXkrGayyyKNo4NPKy1f_22g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

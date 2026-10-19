@@ -61,7 +61,8 @@ Também é possível iniciar o simulador pelo menu do Xcode e usar:
 
 ```sh
 flutter devices
-flutter run -d <id-do-simulador>
+flutter run -d <id-do-simulador> \
+  --dart-define-from-file=config/firebase.local.json
 ```
 
 O simulador serve para validar a interface e parte do comportamento de
@@ -71,7 +72,8 @@ um dispositivo físico, de acordo com a disponibilidade desses recursos.
 Para verificar a compilação release sem configurar assinatura:
 
 ```sh
-flutter build ios --release --no-codesign
+flutter build ios --release --no-codesign \
+  --dart-define-from-file=config/firebase.local.json
 ```
 
 Esse comando produz um build para dispositivo sem assinatura; ele não instala
@@ -79,17 +81,23 @@ nem executa o app no iPhone. Flutter não executa release no simulador iOS.
 
 Para rodar em um iPhone físico, adicione sua Apple Account nas configurações do
 Xcode e, em **Runner > Signing & Capabilities**, selecione seu **Team** e habilite
-**Automatically manage signing**. O Bundle Identifier ainda usa
-`com.example.oQueComerApp`; defina um identificador único acordado com a equipe
-antes de provisionar o app. Dados pessoais de assinatura não devem ser
+**Automatically manage signing**. O Bundle Identifier é
+`br.edu.utfpr.oquecomer`, correspondente ao app registrado no Firebase.
+Dados pessoais de assinatura não devem ser
 versionados como configuração obrigatória de todos os desenvolvedores.
 
 Conecte o iPhone, confirme a confiança no Mac e habilite o Developer Mode quando
 solicitado. Então execute:
 
 ```sh
-flutter run --release -d <id-do-iphone>
+flutter run --release -d <id-do-iphone> \
+  --dart-define-from-file=config/firebase.local.json
 ```
+
+Configure os mesmos defines ao usar o Xcode. Para habilitar
+a integração Gemini, acrescente seu arquivo local conforme o
+[guia do Gemini](gemini.md). Consulte a [configuração Firebase](firebase-crashlytics.md)
+para preencher os campos obrigatórios.
 
 A assinatura e as credenciais da equipe serão necessárias para validar a
 execução release no dispositivo. O build sem assinatura e os testes no simulador

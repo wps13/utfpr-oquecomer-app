@@ -103,12 +103,18 @@ detectam o arquivo automaticamente. Consulte a documentação do plugin caso o
 cache do Swift Package Manager tenha sido resolvido antes de alterar as chaves.
 
 ```sh
-dart format --output=none --set-exit-if-changed .
+dart format --output=none --set-exit-if-changed lib test testing tool
 flutter analyze --no-pub --fatal-infos --fatal-warnings
 flutter test
-flutter build apk --release
-flutter build ios --release --no-codesign
+flutter build apk --release \
+  --dart-define-from-file=config/firebase.local.json
+flutter build ios --release --no-codesign \
+  --dart-define-from-file=config/firebase.local.json
 ```
+
+Preencha `config/firebase.local.json` conforme o
+[guia Firebase](firebase-crashlytics.md#variáveis-de-compilação) antes de gerar
+ou executar o app. As permissões não fazem chamadas à API Gemini na abertura.
 
 Antes de concluir o aceite em dispositivos, validar Android 12L, 13 e 14+
 e iOS: permitir, negar, bloquear, selecionar algumas fotos e alterar o acesso nos
