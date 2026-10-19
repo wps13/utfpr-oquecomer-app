@@ -120,8 +120,9 @@ deve começar com uma instalação limpa.
   isolate principal.
 
 Ambos preservam o erro e a stack e os registram como fatais. A apresentação no
-console local é preservada. O `ErrorReporter` criado no bootstrap é passado ao
-`MainApp` e pode ser injetado por construtor nos repositórios e ViewModels:
+console local é preservada. O `ErrorReporter` criado no bootstrap é registrado
+no `MultiProvider` acima do app e pode ser injetado por construtor nos
+repositórios e ViewModels, usando `context.read<ErrorReporter>()` na composição:
 
 ```dart
 await errorReporter.recordError(
@@ -130,6 +131,11 @@ await errorReporter.recordError(
   reason: 'Falha inesperada ao gerar receita',
 );
 ```
+
+O contrato `report` do cliente Dio é conectado ao mesmo destino pelo
+`HttpErrorReporter`. Assim, o HTTP, o repositório de IA e os handlers globais
+compartilham a política de coleta do APP-19. Os handlers são instalados apenas
+uma vez no `main`; o reporter de console permanece disponível para uso isolado.
 
 Erros tratados são não fatais por padrão. Não reporte falhas esperadas de
 validação ou conectividade como crashes, nem inclua credenciais ou dados
@@ -184,7 +190,7 @@ Eles não substituem a confirmação do recebimento dos crashes no console.
 ## Validação realizada
 
 - Análise estática sem problemas e testes unitários da política de coleta,
-  handlers e validação de configuração. A suíte do APP-19 tem 19 testes.
+  handlers, validação de configuração e adaptação do contrato HTTP.
 - Android release: erros tratado e Flutter e crash nativo recebidos pelo
   Crashlytics, confirmados pelo relatório `topIssues` da ferramenta oficial.
 - Android debug: coleta nativa desabilitada e nenhum evento recebido no

@@ -9,7 +9,7 @@ import 'package:o_que_comer_app/config/ai_dependencies.dart';
 import 'package:o_que_comer_app/config/gemini_config.dart';
 import 'package:o_que_comer_app/data/repositories/gemini_ai_repository.dart';
 import 'package:o_que_comer_app/data/services/ai/gemini_service.dart';
-import 'package:o_que_comer_app/data/services/api/api_client.dart';
+import 'package:o_que_comer_app/data/services/api/json_api_client.dart';
 import 'package:o_que_comer_app/data/services/errors/error_reporter.dart';
 import 'package:o_que_comer_app/domain/models/ai_failure.dart';
 import 'package:o_que_comer_app/domain/models/recipe.dart';
@@ -82,7 +82,7 @@ void main() {
     });
     repository = GeminiAiRepository(
       service: GeminiService(
-        apiClient: ApiClient(client: client),
+        apiClient: JsonApiClient(client: client),
         config: config,
       ),
       errorReporter: reporter,

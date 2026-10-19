@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import '../data/repositories/ai_repository.dart';
 import '../data/repositories/gemini_ai_repository.dart';
 import '../data/services/ai/gemini_service.dart';
-import '../data/services/api/api_client.dart';
+import '../data/services/api/json_api_client.dart';
 import '../data/services/errors/error_reporter.dart';
 import 'gemini_config.dart';
 
@@ -17,7 +17,7 @@ class AiDependencies {
   }) : _client = client ?? http.Client() {
     repository = GeminiAiRepository(
       service: GeminiService(
-        apiClient: ApiClient(client: _client),
+        apiClient: JsonApiClient(client: _client),
         config: config,
       ),
       errorReporter: errorReporter,

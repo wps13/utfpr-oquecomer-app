@@ -10,7 +10,8 @@ plugins {
 
 android {
     namespace = "br.edu.utfpr.oquecomer"
-    compileSdk = flutter.compileSdkVersion
+    // Requisito do permission_handler_android; não altera o targetSdk.
+    compileSdk = 37
     ndkVersion = flutter.ndkVersion
 
     compileOptions {

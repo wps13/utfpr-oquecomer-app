@@ -5,6 +5,10 @@ operações em `AiRepository`: `generateRecipe` e `identifyFoods`. Não existem
 chamadas na abertura do app. A futura ViewModel chama cada operação quando
 o usuário aciona o recurso.
 
+O transporte desta integração fica em `JsonApiClient`. O `ApiClient` baseado em
+Dio e seus clientes de catálogo/Gemini também são preservados para os contratos
+introduzidos pelo APP-20.
+
 ## Configuração local
 
 Crie uma chave de API no [Google AI Studio](https://aistudio.google.com/api-keys)
@@ -56,6 +60,10 @@ ser extraídos. Um proxy para proteger a chave está fora do escopo deste card.
 `AiDependencies` concentra a composição do cliente HTTP, serviço e repositório.
 Recebe o mesmo `ErrorReporter` inicializado no APP-19. Criá-lo não faz chamadas
 nem exige uma chave preenchida; a falta de configuração é tratada no uso.
+
+O `main` registra `AiRepository` via Provider e fecha as dependências no dispose.
+As futuras telas podem injetar `context.read<AiRepository>()` no construtor de
+suas ViewModels. O exemplo abaixo mostra a composição para uso isolado:
 
 ```dart
 final ai = AiDependencies(errorReporter: errorReporter);
@@ -161,8 +169,8 @@ erros; não comprovam a qualidade de identificação/receita do modelo real.
 
 ## Validação realizada
 
-- Formatação e análise estática sem problemas; suíte com 66 testes passando,
-  incluindo 47 testes adicionados no APP-31.
+- Geração, parsing e falhas cobertos por 47 testes adicionados no APP-31,
+  executados junto à suíte das demais funcionalidades.
 - Geração de receita e identificação de alimentos por foto validadas com a API
   real pelo teste manual, usando a configuração local do desenvolvedor.
 - App compilado, instalado e iniciado em debug no emulador Pixel 8 e em um

@@ -6,14 +6,14 @@ import 'package:http/http.dart' as http;
 
 import '../../../config/gemini_config.dart';
 import '../../../domain/models/ai_failure.dart';
-import '../api/api_client.dart';
+import '../api/json_api_client.dart';
 import 'gemini_prompts.dart';
 
 /// Transporte REST do Gemini. Não armazena histórico e não persiste resultados.
 class GeminiService {
   const GeminiService({required this.apiClient, required this.config});
 
-  final ApiClient apiClient;
+  final JsonApiClient apiClient;
   final GeminiConfig config;
 
   Future<Map<String, Object?>> generateJson({
