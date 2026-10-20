@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import 'package:o_que_comer_app/routing/router.dart';
+
 import 'config/ai_dependencies.dart';
 import 'config/env.dart';
 import 'config/error_handling.dart';
@@ -15,7 +17,6 @@ import 'data/services/permissions/permission_handler_service.dart';
 import 'data/services/permissions/permission_service.dart';
 import 'ui/core/themes/theme.dart';
 import 'ui/favorites/view_models/favorites_viewmodel.dart';
-import 'ui/favorites/widgets/favorites_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -63,14 +64,11 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: AppTheme.light,
-      home: ChangeNotifierProvider(
-        // A ViewModel é criada aqui, nunca dentro de um build de tela.
-        create: (c) =>
-            FavoritesViewModel(repository: c.read<FavoritesRepository>()),
-        child: const FavoritesScreen(),
-      ),
+    return ChangeNotifierProvider(
+      // A ViewModel é criada aqui, nunca dentro de um build de tela.
+      create: (c) =>
+          FavoritesViewModel(repository: c.read<FavoritesRepository>()),
+      child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
     );
   }
 }
