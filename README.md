@@ -2,6 +2,47 @@
 
 Projeto Flutter para o app 'O que Comer'.
 
+Configuração, uso e validação do [Firebase e Crashlytics (APP-19)](docs/firebase-crashlytics.md).
+
+Configuração, contratos e testes da [integração Gemini (APP-31)](docs/gemini.md).
+
+Configuração e uso do serviço de permissões: [APP-23 / TT14](docs/permissoes.md).
+
+Preparação do Xcode e execução no iOS: [guia de desenvolvimento](docs/desenvolvimento-ios.md).
+
+## Executar localmente
+
+Na primeira configuração, crie os arquivos locais a partir dos exemplos:
+
+```sh
+flutter pub get
+cp -n config/firebase.example.json config/firebase.local.json
+cp -n config/gemini.example.json config/gemini.local.json
+```
+
+Preencha os valores conforme os guias de [Firebase](docs/firebase-crashlytics.md#variáveis-de-compilação)
+e [Gemini](docs/gemini.md#configuração-local). Se já possui os arquivos preenchidos,
+use-os diretamente. Os arquivos `*.local.json` são ignorados pelo Git.
+
+Com um emulador iniciado ou celular conectado, execute:
+
+```sh
+flutter run \
+  --dart-define-from-file=config/firebase.local.json \
+  --dart-define-from-file=config/gemini.local.json
+```
+
+Para escolher um dispositivo, consulte `flutter devices` e acrescente
+`-d <id-do-dispositivo>` ao comando. Os arquivos não são carregados automaticamente;
+os argumentos precisam ser fornecidos a cada execução ou configurados no IDE.
+
+Os testes unitários e a análise estática não exigem os arquivos locais:
+
+```sh
+flutter analyze
+flutter test
+```
+
 ## Convenções de Git
 
 ### Commits
@@ -110,3 +151,33 @@ O projeto segue o padrão MVVM, como recomendado na documentação oficial.
 - Data: responsável por manipular os dados, sejam recebidos de apis externas ou não, sendo a fonte da verdade, os dados daqui vão para a UI, usando os modelos do Domain.
 
 ![Diagrama](assets/diagrama_arquitetura.png)
+
+## Convenções de estado
+
+O estado do app usa `provider` com `ChangeNotifier` como base das ViewModels.
+A `FavoritesViewModel` (`lib/ui/favorites/`) é o exemplo a ser seguido.
+
+- Cada tela ou fluxo tem a sua própria ViewModel.
+- Widgets não chamam API, banco local ou LLM. Isso é feito pelos repositórios, usados pela ViewModel.
+- Os repositórios são injetados pelo construtor da ViewModel.
+- A ViewModel é criada com `ChangeNotifierProvider(create: ...)`, nunca dentro do `build`.
+- Providers globais (repositórios e serviços) ficam declarados no topo do app, acima do `MaterialApp` (ou `MaterialApp.router`, quando as rotas forem configuradas).
+- `context.watch` só é usado dentro do `build`; em callbacks use `context.read`.
+- `notifyListeners()` é chamado sempre que o estado mudar, mas nunca durante o `build`.
+- Carregamentos iniciais são disparados no `initState` ou em um callback.
+- Estado efêmero de UI (aba selecionada, campo de texto, chips em edição) fica em `StatefulWidget`. Só o estado compartilhado entre telas vai para ViewModel.
+- Operações assíncronas usam estado explícito, com o enum `ViewState` (`loading`, `success`, `error`).
+- Testes de ViewModel rodam sem renderizar widgets, com repositórios falsos de `testing/fakes/`.
+## Configuração de chaves e URLs
+
+Chaves e URLs não ficam no código. Copie `env.example.json` para `env.json`
+(ignorado pelo Git) e rode:
+
+```bash
+flutter run \
+  --dart-define-from-file=config/firebase.local.json \
+  --dart-define-from-file=env.json
+```
+
+Variáveis: `CATALOG_BASE_URL`, `GEMINI_BASE_URL`, `GEMINI_API_KEY`.
+Os logs de requisição só são habilitados em modo debug.

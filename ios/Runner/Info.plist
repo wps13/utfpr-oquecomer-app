@@ -26,6 +26,16 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>FirebaseCrashlyticsCollectionEnabled</key>
+	<string>$(CRASHLYTICS_COLLECTION_ENABLED)</string>
+	<key>NSCameraUsageDescription</key>
+	<string>O Que Comer App precisa acessar a câmera para tirar fotos quando você usar esse recurso.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>O Que Comer App usa sua localização para encontrar opções de comida perto de você, somente enquanto o aplicativo está em uso.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>O Que Comer App precisa acessar o microfone para captar sua voz quando você usar os recursos de áudio.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>O Que Comer App precisa acessar suas fotos para que você escolha imagens para usar no aplicativo.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

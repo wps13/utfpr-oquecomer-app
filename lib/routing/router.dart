@@ -5,7 +5,7 @@ import 'package:o_que_comer_app/routing/routes.dart';
 import 'package:o_que_comer_app/ui/ai_recipes/widgets/ai_recipes_screen.dart';
 
 import 'package:o_que_comer_app/ui/catalog/widgets/catalog_screen.dart';
-import 'package:o_que_comer_app/ui/favorites/widget/favorites_screen.dart';
+import 'package:o_que_comer_app/ui/favorites/widgets/favorites_screen.dart';
 import 'package:o_que_comer_app/ui/hands_free_mode/widgets/hands_free_mode_screen.dart';
 import 'package:o_que_comer_app/ui/home/widgets/home_screen.dart';
 import 'package:o_que_comer_app/ui/inventory/widgets/inventory_screen.dart';
