@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
 
 import 'package:o_que_comer_app/routing/router.dart';
@@ -20,6 +21,8 @@ import 'ui/favorites/view_models/favorites_viewmodel.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Hive.initFlutter();
+  final favoritesBox = await Hive.openBox<dynamic>('favorites');
   final errorReporter = await initializeErrorReporting();
   installErrorHandlers(errorReporter: errorReporter);
   final env = Env.fromEnvironment();
@@ -51,7 +54,10 @@ Future<void> main() async {
           create: (c) => c.read<AiDependencies>().repository,
         ),
         Provider<FavoritesRepository>(
-          create: (_) => InMemoryFavoritesRepository(),
+          create: (c) => HiveFavoritesRepository(
+            box: HiveFavoritesBoxAdapter(favoritesBox),
+            errorReporter: c.read<ErrorReporter>(),
+          ),
         ),
       ],
       child: const MainApp(),

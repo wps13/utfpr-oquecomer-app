@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../data/repositories/favorites_repository.dart';
-import '../../../domain/models/favorite.dart';
+import '../../../domain/models/recipe.dart';
 import '../../core/view_state.dart';
 
 /// ViewModel modelo: repositório injetado no construtor, estado explícito
@@ -14,12 +14,12 @@ class FavoritesViewModel extends ChangeNotifier {
   final FavoritesRepository _repository;
 
   ViewState _state = ViewState.loading;
-  List<Favorite> _favorites = const [];
+  List<Recipe> _favorites = const [];
   String? _errorMessage;
   bool _disposed = false;
 
   ViewState get state => _state;
-  List<Favorite> get favorites => _favorites;
+  List<Recipe> get favorites => _favorites;
   String? get errorMessage => _errorMessage;
 
   /// Carrega os favoritos. Chamar do `initState` ou de um callback.
@@ -28,11 +28,19 @@ class FavoritesViewModel extends ChangeNotifier {
   });
 
   Future<void> add(String name) => _run(() async {
-    final favorite = Favorite(
+    final favorite = Recipe(
       id: DateTime.now().microsecondsSinceEpoch.toString(),
-      name: name,
+      title: name,
+      ingredients: const ['Não informado'],
+      steps: const ['Não informado'],
+      source: RecipeSource.catalog,
     );
     await _repository.add(favorite);
+    _favorites = await _repository.getFavorites();
+  });
+
+  Future<void> saveRecipe(Recipe recipe) => _run(() async {
+    await _repository.save(recipe.copyWithFavoritedAt(DateTime.now().toUtc()));
     _favorites = await _repository.getFavorites();
   });
 
