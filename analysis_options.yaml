@@ -29,3 +29,4 @@ linter:
     - sized_box_for_whitespace
     - lines_longer_than_80_chars
     - always_declare_return_types
+    - prefer_relative_imports
