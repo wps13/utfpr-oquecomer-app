@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:o_que_comer_app/data/repositories/favorites_repository.dart';
-import 'package:o_que_comer_app/domain/models/favorite.dart';
+import 'package:o_que_comer_app/domain/models/recipe.dart';
 import 'package:o_que_comer_app/routing/router.dart';
 import 'package:o_que_comer_app/routing/routes.dart';
 import 'package:o_que_comer_app/ui/favorites/view_models/favorites_viewmodel.dart';
@@ -9,13 +9,19 @@ import 'package:provider/provider.dart';
 
 class _ImmediateFavoritesRepository implements FavoritesRepository {
   @override
-  Future<List<Favorite>> getFavorites() async => const [];
+  Future<List<Recipe>> getFavorites() async => const [];
 
   @override
-  Future<void> add(Favorite favorite) async {}
+  Future<void> save(Recipe favorite) async {}
+
+  @override
+  Future<void> add(Recipe favorite) async {}
 
   @override
   Future<void> remove(String id) async {}
+
+  @override
+  Future<bool> isFavorite(String id) async => false;
 }
 
 void main() {

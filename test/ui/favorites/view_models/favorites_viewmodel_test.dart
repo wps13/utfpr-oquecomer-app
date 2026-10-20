@@ -1,12 +1,18 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:o_que_comer_app/domain/models/favorite.dart';
+import 'package:o_que_comer_app/domain/models/recipe.dart';
 import 'package:o_que_comer_app/ui/core/view_state.dart';
 import 'package:o_que_comer_app/ui/favorites/view_models/favorites_viewmodel.dart';
 
 import '../../../../testing/fakes/fake_favorites_repository.dart';
 
 void main() {
-  const lasanha = Favorite(id: '1', name: 'Lasanha');
+  final lasanha = Recipe(
+    id: '1',
+    title: 'Lasanha',
+    ingredients: const ['farinha'],
+    steps: const ['Misture'],
+    source: RecipeSource.catalog,
+  );
 
   late FakeFavoritesRepository repository;
   late FavoritesViewModel viewModel;
