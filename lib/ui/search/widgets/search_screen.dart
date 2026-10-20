@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:o_que_comer_app/routing/routes.dart';
+import '../../../routing/routes.dart';
 
 class SearchScreen extends StatelessWidget {
   const new({super.key});

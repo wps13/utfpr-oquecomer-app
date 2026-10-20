@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import 'package:o_que_comer_app/routing/router.dart';
+import 'routing/router.dart';
 
 import 'config/ai_dependencies.dart';
 import 'config/env.dart';

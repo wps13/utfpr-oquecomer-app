@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:o_que_comer_app/routing/routes.dart';
-import 'package:o_que_comer_app/ui/ai_recipes/widgets/ai_recipes_screen.dart';
+import 'routes.dart';
+import '../ui/ai_recipes/widgets/ai_recipes_screen.dart';
 
-import 'package:o_que_comer_app/ui/catalog/widgets/catalog_screen.dart';
-import 'package:o_que_comer_app/ui/favorites/widgets/favorites_screen.dart';
-import 'package:o_que_comer_app/ui/hands_free_mode/widgets/hands_free_mode_screen.dart';
-import 'package:o_que_comer_app/ui/home/widgets/home_screen.dart';
-import 'package:o_que_comer_app/ui/inventory/widgets/inventory_screen.dart';
-import 'package:o_que_comer_app/ui/recipe_details/widgets/recipe_details_screen.dart';
-import 'package:o_que_comer_app/ui/search/widgets/search_screen.dart';
+import '../ui/catalog/widgets/catalog_screen.dart';
+import '../ui/favorites/widgets/favorites_screen.dart';
+import '../ui/hands_free_mode/widgets/hands_free_mode_screen.dart';
+import '../ui/home/widgets/home_screen.dart';
+import '../ui/inventory/widgets/inventory_screen.dart';
+import '../ui/recipe_details/widgets/recipe_details_screen.dart';
+import '../ui/search/widgets/search_screen.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 
