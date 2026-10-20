@@ -68,10 +68,7 @@ class MainApp extends StatelessWidget {
       // A ViewModel é criada aqui, nunca dentro de um build de tela.
       create: (c) =>
           FavoritesViewModel(repository: c.read<FavoritesRepository>()),
-      child: MaterialApp.router(
-        theme: AppTheme.light,
-        routerConfig: router,
-      ),
+      child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
     );
   }
 }
