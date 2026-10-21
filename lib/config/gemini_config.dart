@@ -32,4 +32,21 @@ class GeminiConfig {
       maxOutputTokens > 0 &&
       maxOutputTokens <= 65536 &&
       timeout > Duration.zero;
+
+  /// Diagnóstico seguro para logs locais: nunca retorna a chave.
+  List<String> get invalidReasons {
+    final reasons = <String>[];
+    if (apiKey.trim().isEmpty) reasons.add('apiKey ausente ou vazia');
+    if (!RegExp(r'^gemini-[a-zA-Z0-9.\-]+$').hasMatch(model)) {
+      reasons.add('modelo inválido');
+    }
+    if (!temperature.isFinite || temperature < 0 || temperature > 2) {
+      reasons.add('temperature fora do intervalo 0..2');
+    }
+    if (maxOutputTokens <= 0 || maxOutputTokens > 65536) {
+      reasons.add('maxOutputTokens fora do intervalo 1..65536');
+    }
+    if (timeout <= Duration.zero) reasons.add('timeout deve ser positivo');
+    return List.unmodifiable(reasons);
+  }
 }

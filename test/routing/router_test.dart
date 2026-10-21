@@ -1,5 +1,8 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:o_que_comer_app/data/repositories/ai_repository.dart';
 import 'package:o_que_comer_app/data/repositories/favorites_repository.dart';
 import 'package:o_que_comer_app/domain/models/recipe.dart';
 import 'package:o_que_comer_app/routing/router.dart';
@@ -24,6 +27,18 @@ class _ImmediateFavoritesRepository implements FavoritesRepository {
   Future<bool> isFavorite(String id) async => false;
 }
 
+class _ImmediateAiRepository implements AiRepository {
+  @override
+  Future<Recipe> generateRecipe(List<String> ingredients) =>
+      throw UnimplementedError();
+
+  @override
+  Future<List<String>> identifyFoods({
+    required Uint8List imageBytes,
+    required String mimeType,
+  }) => throw UnimplementedError();
+}
+
 void main() {
   late FavoritesViewModel favoritesViewModel;
 
@@ -42,7 +57,10 @@ void main() {
     await tester.pumpWidget(
       ChangeNotifierProvider.value(
         value: favoritesViewModel,
-        child: MaterialApp.router(routerConfig: router),
+        child: Provider<AiRepository>.value(
+          value: _ImmediateAiRepository(),
+          child: MaterialApp.router(routerConfig: router),
+        ),
       ),
     );
     await tester.pumpAndSettle();
@@ -74,14 +92,14 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(router.routeInformationProvider.value.uri.path, Routes.aiRecipe);
-    expect(find.text('Receitas com IA'), findsOneWidget);
+    expect(find.text('O que tem na geladeira?'), findsOneWidget);
   });
 
   testWidgets('maps shell routes to their screens', (tester) async {
     await pumpRouter(tester);
 
     final shellRoutes = {
-      Routes.aiRecipe: 'Receitas com IA',
+      Routes.aiRecipe: 'O que tem na geladeira?',
       Routes.inventory: 'Despensa',
       Routes.search: 'Abrir detalhes da receita',
     };

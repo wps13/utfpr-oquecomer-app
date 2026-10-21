@@ -1,10 +1,325 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:provider/provider.dart';
 
-class AiRecipesScreen extends StatelessWidget {
-  const new({super.key});
+import '../../../data/services/permissions/permission_service.dart';
+import '../../../domain/models/app_permission.dart';
+import '../../../domain/models/recipe.dart';
+import '../../../routing/routes.dart';
+import '../../core/ui/permission_action.dart';
+import '../../core/view_models/permission_viewmodel.dart';
+import '../../core/themes/colors.dart';
+import '../../core/themes/radius.dart';
+import '../../core/themes/spacing.dart';
+import '../view_models/ai_recipes_viewmodel.dart';
+
+class AiRecipesScreen extends StatefulWidget {
+  const AiRecipesScreen({super.key});
+
+  @override
+  State<AiRecipesScreen> createState() => _AiRecipesScreenState();
+}
+
+class _AiRecipesScreenState extends State<AiRecipesScreen> {
+  final _picker = ImagePicker();
+
+  Future<void> _pickImage(ImageSource source) async {
+    try {
+      final file = await _picker.pickImage(
+        source: source,
+        // Reduz o payload enviado ao Gemini sem alterar a foto exibida.
+        maxWidth: 1024,
+        imageQuality: 85,
+      );
+      if (file == null) {
+        _debugLog('pickImage: usuário cancelou a seleção');
+        return;
+      }
+      final bytes = await file.readAsBytes();
+      final mimeType = _mimeTypeFor(file);
+      if (mimeType == null) {
+        _debugLog('pickImage: formato não suportado');
+        if (!mounted) return;
+        context.read<AiRecipesViewModel>().setError(
+          'Escolha uma imagem JPEG, PNG ou WebP.',
+        );
+        return;
+      }
+      if (!mounted) return;
+      context.read<AiRecipesViewModel>().setImage(
+        bytes: bytes,
+        mimeType: mimeType,
+      );
+      _debugLog(
+        'pickImage: imagem carregada (bytes=${bytes.length}, mime=$mimeType)',
+      );
+    } on Object catch (error, stackTrace) {
+      _debugLog('pickImage: erro ${error.runtimeType}', stackTrace);
+      if (mounted) {
+        context.read<AiRecipesViewModel>().setError(
+          'Não foi possível carregar a imagem. Tente novamente.',
+        );
+      }
+    }
+  }
+
+  void _debugLog(String message, [StackTrace? stackTrace]) {
+    if (!kDebugMode) return;
+    debugPrint('[AiRecipesScreen] $message');
+    if (stackTrace != null) debugPrintStack(stackTrace: stackTrace);
+  }
+
+  String? _mimeTypeFor(XFile file) {
+    final mimeType = file.mimeType?.toLowerCase();
+    if (const {'image/jpeg', 'image/png', 'image/webp'}.contains(mimeType)) {
+      return mimeType;
+    }
+    final extension = file.name.split('.').last.toLowerCase();
+    return switch (extension) {
+      'jpg' || 'jpeg' => 'image/jpeg',
+      'png' => 'image/png',
+      'webp' => 'image/webp',
+      _ => null,
+    };
+  }
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(body: Center(child: Text('Receitas com IA')));
+    final viewModel = context.watch<AiRecipesViewModel>();
+    final permissionService = context.read<PermissionService?>();
+    final permissionViewModel = permissionService == null
+        ? null
+        : PermissionViewModel(permissionService: permissionService);
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Receita com IA'),
+        leading: BackButton(
+          onPressed: () {
+            if (context.canPop()) {
+              context.pop();
+            } else {
+              context.go(Routes.home);
+            }
+          },
+        ),
+      ),
+      body: SafeArea(
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(
+            AppSpacing.x4,
+            AppSpacing.x3,
+            AppSpacing.x4,
+            AppSpacing.x8,
+          ),
+          children: [
+            Text(
+              'O que tem na geladeira?',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.headlineSmall
+                  ?.copyWith(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: AppSpacing.x1),
+            Text(
+              'Insira seus ingredientes e deixe a IA criar a magia culinária.',
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyLarge,
+            ),
+            const SizedBox(height: AppSpacing.x5),
+            _imageSelector(permissionViewModel),
+            const SizedBox(height: AppSpacing.x4),
+            SizedBox(
+              width: double.infinity,
+              child: FilledButton.icon(
+                onPressed: viewModel.isLoading
+                    ? null
+                    : viewModel.generateRecipe,
+                icon: viewModel.isLoading
+                    ? const SizedBox.square(
+                        dimension: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.auto_awesome),
+                label: Text(
+                  viewModel.isLoading ? 'Gerando receita...' : 'Gerar com IA',
+                ),
+              ),
+            ),
+            if (viewModel.errorMessage != null) ...[
+              const SizedBox(height: AppSpacing.x3),
+              _ErrorCard(
+                message: viewModel.errorMessage!,
+                onRetry: viewModel.generateRecipe,
+              ),
+            ],
+            if (viewModel.recipe case final recipe?) ...[
+              const SizedBox(height: AppSpacing.x5),
+              _RecipeCard(recipe: recipe),
+            ],
+          ],
+        ),
+      ),
+    );
   }
+
+  Widget _imageSelector(PermissionViewModel? permissionViewModel) {
+    final imageBytes = context.watch<AiRecipesViewModel>().imageBytes;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.x3),
+        child: Column(
+          children: [
+            if (imageBytes != null)
+              ClipRRect(
+                borderRadius: AppRadius.borderMd,
+                child: Image.memory(
+                  imageBytes,
+                  height: 180,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+              )
+            else
+              const Padding(
+                padding: EdgeInsets.all(AppSpacing.x5),
+                child: Icon(Icons.photo_camera_outlined, size: 48),
+              ),
+            const SizedBox(height: AppSpacing.x2),
+            Row(
+              children: [
+                Expanded(
+                  child: permissionViewModel == null
+                      ? OutlinedButton.icon(
+                          onPressed: null,
+                          icon: const Icon(Icons.camera_alt_outlined),
+                          label: const Text('Tirar foto'),
+                        )
+                      : PermissionAction(
+                          viewModel: permissionViewModel,
+                          permission: AppPermission.camera,
+                          onAuthorized: (_) => _pickImage(ImageSource.camera),
+                          builder: (context, onPressed) => OutlinedButton.icon(
+                            onPressed: onPressed,
+                            icon: const Icon(Icons.camera_alt_outlined),
+                            label: const Text('Tirar foto'),
+                          ),
+                        ),
+                ),
+                const SizedBox(width: AppSpacing.x2),
+                Expanded(
+                  child: permissionViewModel == null
+                      ? OutlinedButton.icon(
+                          onPressed: null,
+                          icon: const Icon(Icons.photo_library_outlined),
+                          label: const Text('Galeria'),
+                        )
+                      : PermissionAction(
+                          viewModel: permissionViewModel,
+                          permission: AppPermission.photos,
+                          onAuthorized: (_) => _pickImage(ImageSource.gallery),
+                          builder: (context, onPressed) => OutlinedButton.icon(
+                            onPressed: onPressed,
+                            icon: const Icon(Icons.photo_library_outlined),
+                            label: const Text('Galeria'),
+                          ),
+                        ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ErrorCard extends StatelessWidget {
+  const _ErrorCard({required this.message, required this.onRetry});
+
+  final String message;
+  final VoidCallback onRetry;
+
+  @override
+  Widget build(BuildContext context) => Card(
+    color: AppColors.errorContainer,
+    child: Padding(
+      padding: const EdgeInsets.all(AppSpacing.x3),
+      child: Row(
+        children: [
+          const Icon(Icons.error_outline, color: AppColors.onErrorContainer),
+          const SizedBox(width: AppSpacing.x2),
+          Expanded(
+            child: Text(
+              message,
+              style: const TextStyle(color: AppColors.onErrorContainer),
+            ),
+          ),
+          TextButton(onPressed: onRetry, child: const Text('Tentar')),
+        ],
+      ),
+    ),
+  );
+}
+
+class _RecipeCard extends StatelessWidget {
+  const _RecipeCard({required this.recipe});
+
+  final Recipe recipe;
+
+  @override
+  Widget build(BuildContext context) => Card(
+    child: Padding(
+      padding: const EdgeInsets.all(AppSpacing.x4),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            recipe.title,
+            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+              color: AppColors.primary,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          if (recipe.description.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.x2),
+            Text(recipe.description),
+          ],
+          const SizedBox(height: AppSpacing.x4),
+          Text(
+            'Ingredientes',
+            style: Theme.of(context).textTheme.titleMedium
+                ?.copyWith(fontWeight: FontWeight.w700),
+          ),
+          ...recipe.ingredients.map(
+            (ingredient) => CheckboxListTile(
+              value: false,
+              onChanged: null,
+              dense: true,
+              contentPadding: EdgeInsets.zero,
+              title: Text(ingredient),
+              controlAffinity: ListTileControlAffinity.leading,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.x3),
+          Text(
+            'Modo de preparo',
+            style: Theme.of(context).textTheme.titleMedium
+                ?.copyWith(fontWeight: FontWeight.w700),
+          ),
+          ...recipe.steps.indexed.map(
+            (entry) => ListTile(
+              contentPadding: EdgeInsets.zero,
+              leading: CircleAvatar(
+                radius: 14,
+                backgroundColor: AppColors.primaryFixed,
+                child: Text('${entry.$1 + 1}'),
+              ),
+              title: Text(entry.$2),
+            ),
+          ),
+        ],
+      ),
+    ),
+  );
 }
