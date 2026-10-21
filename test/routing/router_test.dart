@@ -57,11 +57,24 @@ void main() {
     await pumpRouter(tester);
 
     expect(find.text('Catálogo'), findsOneWidget);
+    expect(find.text('Gerar com IA'), findsOneWidget);
     expect(find.byType(NavigationBar), findsOneWidget);
     expect(
       tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
       0,
     );
+  });
+
+  testWidgets('opens the AI recipe screen from the home action', (
+    tester,
+  ) async {
+    await pumpRouter(tester);
+
+    await tester.tap(find.text('Gerar com IA'));
+    await tester.pumpAndSettle();
+
+    expect(router.routeInformationProvider.value.uri.path, Routes.aiRecipe);
+    expect(find.text('Receitas com IA'), findsOneWidget);
   });
 
   testWidgets('maps shell routes to their screens', (tester) async {
