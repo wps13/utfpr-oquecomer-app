@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 
 import '../../../config/gemini_config.dart';
@@ -23,6 +23,15 @@ class GeminiService {
     String? mimeType,
   }) async {
     if (!config.isValid) {
+      _debugLog(
+        'generateJson: configuração inválida '
+        '(motivos=${config.invalidReasons.join('; ')}, '
+        'apiKeyPresent=${config.apiKey.trim().isNotEmpty}, '
+        'apiKeyLength=${config.apiKey.trim().length}, '
+        'model=${config.model}, temperature=${config.temperature}, '
+        'maxOutputTokens=${config.maxOutputTokens}, '
+        'timeout=${config.timeout.inSeconds}s)',
+      );
       throw const AiFailure(AiFailureKind.configuration);
     }
     final parts = <Map<String, Object?>>[
@@ -40,6 +49,12 @@ class GeminiService {
       '/v1beta/models/${config.model}:generateContent',
     );
     try {
+      _debugLog(
+        'generateJson: enviando requisição '
+        '(model=${config.model}, imagem=${imageBytes != null}, '
+        'bytes=${imageBytes?.length ?? 0}, '
+        'timeout=${config.timeout.inSeconds}s)',
+      );
       final response = await apiClient.postJson(
         uri,
         headers: {'x-goog-api-key': config.apiKey.trim()},
@@ -63,23 +78,44 @@ class GeminiService {
         },
         timeout: config.timeout,
       );
+      _debugLog('generateJson: resposta HTTP ${response.statusCode}');
       _checkStatus(response.statusCode);
       if (response.bodyBytes.isEmpty) {
+        _debugLog('generateJson: resposta HTTP sem corpo');
         throw const AiFailure(AiFailureKind.emptyResponse);
       }
       return _parseEnvelope(jsonDecode(utf8.decode(response.bodyBytes)));
+    } on AiFailure catch (failure) {
+      _debugLog('generateJson: AiFailure kind=${failure.kind.name}');
+      rethrow;
     } on TimeoutException {
+      _debugLog('generateJson: timeout');
       throw const AiFailure(AiFailureKind.timeout);
-    } on http.ClientException {
+    } on http.ClientException catch (error, stackTrace) {
       // IOClient encapsula falhas de socket/DNS em ClientException.
+      _debugLog(
+        'generateJson: erro de conexão ${error.runtimeType}',
+        stackTrace,
+      );
       throw const AiFailure(AiFailureKind.connection);
-    } on FormatException {
+    } on FormatException catch (error, stackTrace) {
+      _debugLog(
+        'generateJson: resposta inválida ${error.runtimeType}',
+        stackTrace,
+      );
       throw const AiFailure(AiFailureKind.invalidResponse);
+    } on Object catch (error, stackTrace) {
+      _debugLog(
+        'generateJson: erro inesperado ${error.runtimeType}',
+        stackTrace,
+      );
+      rethrow;
     }
   }
 
   static void _checkStatus(int status) {
     if (status >= 200 && status < 300) return;
+    _debugLog('_checkStatus: HTTP $status');
     final kind = switch (status) {
       400 || 401 || 403 || 404 => AiFailureKind.configuration,
       408 || 504 => AiFailureKind.timeout,
@@ -88,6 +124,12 @@ class GeminiService {
       _ => AiFailureKind.unexpected,
     };
     throw AiFailure(kind);
+  }
+
+  static void _debugLog(String message, [StackTrace? stackTrace]) {
+    if (!kDebugMode) return;
+    debugPrint('[GeminiService] $message');
+    if (stackTrace != null) debugPrintStack(stackTrace: stackTrace);
   }
 
   static Map<String, Object?> _parseEnvelope(Object? decoded) {

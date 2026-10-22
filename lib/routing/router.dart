@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
 import 'routes.dart';
+import '../data/repositories/ai_repository.dart';
 import '../ui/ai_recipes/widgets/ai_recipes_screen.dart';
+import '../ui/ai_recipes/view_models/ai_recipes_viewmodel.dart';
 
 import '../ui/catalog/widgets/catalog_screen.dart';
 import '../ui/favorites/widgets/favorites_screen.dart';
@@ -32,7 +35,11 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: Routes.aiRecipe,
           builder: (context, state) {
-            return const AiRecipesScreen();
+            return ChangeNotifierProvider(
+              create: (context) =>
+                  AiRecipesViewModel(repository: context.read<AiRepository>()),
+              child: const AiRecipesScreen(),
+            );
           },
         ),
         GoRoute(
