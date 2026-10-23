@@ -20,6 +20,8 @@ final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 final GoRouter router = GoRouter(
   navigatorKey: _rootNavigatorKey,
   initialLocation: Routes.home,
+  // Rota inválida ou falha de navegação: volta para a home.
+  onException: (context, state, router) => router.go(Routes.home),
   routes: [
     ShellRoute(
       builder: (context, state, child) {
