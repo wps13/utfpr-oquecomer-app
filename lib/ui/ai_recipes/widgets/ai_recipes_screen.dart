@@ -162,6 +162,13 @@ class _AiRecipesScreenState extends State<AiRecipesScreen> {
             ),
             const SizedBox(height: AppSpacing.x5),
             _imageSelector(permissionViewModel),
+            if (viewModel.foodsDetected) ...[
+              const SizedBox(height: AppSpacing.x4),
+              DetectedIngredients(
+                ingredients: viewModel.detectedIngredients,
+                onRemove: viewModel.removeIngredient,
+              ),
+            ],
             const SizedBox(height: AppSpacing.x4),
             _servingsSelector(viewModel),
             if (viewModel.foodsDetected) ...[
