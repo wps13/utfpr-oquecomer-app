@@ -216,9 +216,7 @@ class _AiRecipesScreenState extends State<AiRecipesScreen> {
       child: Row(
         children: [
           IconButton(
-            onPressed: viewModel.isLoading
-                ? null
-                : () => _changeServings(-1),
+            onPressed: viewModel.isLoading ? null : () => _changeServings(-1),
             icon: const Icon(Icons.remove),
             tooltip: 'Diminuir quantidade de pessoas',
           ),
@@ -236,9 +234,7 @@ class _AiRecipesScreenState extends State<AiRecipesScreen> {
             ),
           ),
           IconButton(
-            onPressed: viewModel.isLoading
-                ? null
-                : () => _changeServings(1),
+            onPressed: viewModel.isLoading ? null : () => _changeServings(1),
             icon: const Icon(Icons.add),
             tooltip: 'Aumentar quantidade de pessoas',
           ),
