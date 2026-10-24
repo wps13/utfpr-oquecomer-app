@@ -13,7 +13,10 @@ class Env {
 
   /// Lê os valores passados via `--dart-define`.
   factory Env.fromEnvironment() => const Env(
-    catalogBaseUrl: String.fromEnvironment('CATALOG_BASE_URL'),
+    catalogBaseUrl: String.fromEnvironment(
+      'CATALOG_BASE_URL',
+      defaultValue: 'https://api-receitas-pi.vercel.app',
+    ),
     geminiBaseUrl: String.fromEnvironment(
       'GEMINI_BASE_URL',
       defaultValue: 'https://generativelanguage.googleapis.com/v1beta',

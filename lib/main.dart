@@ -9,6 +9,8 @@ import 'config/env.dart';
 import 'config/error_handling.dart';
 import 'config/firebase_bootstrap.dart';
 import 'data/repositories/ai_repository.dart';
+import 'data/repositories/api_catalog_repository.dart';
+import 'data/repositories/catalog_repository.dart';
 import 'data/repositories/favorites_repository.dart';
 import 'data/services/api/api_client.dart';
 import 'data/services/crash/error_reporter.dart' as http_errors;
@@ -41,6 +43,13 @@ Future<void> main() async {
         Provider<CatalogApiClient>(
           create: (c) =>
               CatalogApiClient(env, c.read<http_errors.ErrorReporter>()),
+          dispose: (_, client) => client.close(),
+        ),
+        Provider<CatalogRepository>(
+          create: (c) => ApiCatalogRepository(
+            client: c.read<CatalogApiClient>(),
+            errorReporter: c.read<ErrorReporter>(),
+          ),
         ),
         Provider<GeminiApiClient>(
           create: (c) =>
