@@ -14,6 +14,7 @@ import '../../core/themes/colors.dart';
 import '../../core/themes/radius.dart';
 import '../../core/themes/spacing.dart';
 import '../view_models/ai_recipes_viewmodel.dart';
+import 'detected_ingredients.dart';
 
 class AiRecipesScreen extends StatefulWidget {
   const AiRecipesScreen({super.key});
@@ -128,13 +129,20 @@ class _AiRecipesScreenState extends State<AiRecipesScreen> {
             ),
             const SizedBox(height: AppSpacing.x5),
             _imageSelector(permissionViewModel),
+            if (viewModel.foodsDetected) ...[
+              const SizedBox(height: AppSpacing.x4),
+              DetectedIngredients(
+                ingredients: viewModel.detectedIngredients,
+                onRemove: viewModel.removeIngredient,
+              ),
+            ],
             const SizedBox(height: AppSpacing.x4),
             SizedBox(
               width: double.infinity,
               child: FilledButton.icon(
-                onPressed: viewModel.isLoading
-                    ? null
-                    : viewModel.generateRecipe,
+                onPressed: viewModel.canGenerateRecipe
+                    ? viewModel.generateRecipe
+                    : null,
                 icon: viewModel.isLoading
                     ? const SizedBox.square(
                         dimension: 18,
@@ -142,7 +150,11 @@ class _AiRecipesScreenState extends State<AiRecipesScreen> {
                       )
                     : const Icon(Icons.auto_awesome),
                 label: Text(
-                  viewModel.isLoading ? 'Gerando receita...' : 'Gerar com IA',
+                  viewModel.isLoading
+                      ? 'Processando...'
+                      : viewModel.foodsDetected
+                      ? 'Gerar receita'
+                      : 'Detectar ingredientes',
                 ),
               ),
             ),
@@ -292,13 +304,16 @@ class _RecipeCard extends StatelessWidget {
                 ?.copyWith(fontWeight: FontWeight.w700),
           ),
           ...recipe.ingredients.map(
-            (ingredient) => CheckboxListTile(
-              value: false,
-              onChanged: null,
-              dense: true,
+            (ingredient) => ListTile(
               contentPadding: EdgeInsets.zero,
-              title: Text(ingredient),
-              controlAffinity: ListTileControlAffinity.leading,
+              dense: true,
+              minVerticalPadding: 0,
+              visualDensity: const VisualDensity(vertical: -2),
+              leading: const Icon(Icons.circle, size: 8),
+              title: Text(
+                ingredient,
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
             ),
           ),
           const SizedBox(height: AppSpacing.x3),
