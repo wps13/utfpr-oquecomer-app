@@ -10,8 +10,8 @@ plugins {
 
 android {
     namespace = "br.edu.utfpr.oquecomer"
-    // Requisito do permission_handler_android; não altera o targetSdk.
-    compileSdk = 37
+    // permission_handler 12.x supports the installed stable Android SDK 36.
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
