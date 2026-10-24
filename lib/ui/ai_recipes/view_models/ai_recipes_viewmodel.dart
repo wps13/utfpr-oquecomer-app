@@ -6,6 +6,9 @@ import '../../../domain/models/ai_failure.dart';
 import '../../../domain/models/recipe.dart';
 
 class AiRecipesViewModel extends ChangeNotifier {
+  static const defaultServings = 1;
+  static const minServings = 1;
+
   AiRecipesViewModel({required AiRepository repository})
     // ignore: prefer_initializing_formals
     : _repository = repository;
@@ -18,6 +21,7 @@ class AiRecipesViewModel extends ChangeNotifier {
   bool _loading = false;
   bool _foodsDetected = false;
   List<String> _detectedIngredients = const [];
+  int _servings = defaultServings;
   bool _disposed = false;
 
   Uint8List? get imageBytes => _imageBytes;
@@ -28,8 +32,17 @@ class AiRecipesViewModel extends ChangeNotifier {
   bool get foodsDetected => _foodsDetected;
   List<String> get detectedIngredients =>
       List.unmodifiable(_detectedIngredients);
+  int get servings => _servings;
   bool get canGenerateRecipe =>
       !_loading && (!_foodsDetected || _detectedIngredients.isNotEmpty);
+
+  void setServings(int servings) {
+    if (servings < minServings) return;
+    _servings = servings;
+    _recipe = null;
+    _errorMessage = null;
+    _notify();
+  }
 
   void setImage({required Uint8List bytes, required String mimeType}) {
     _imageBytes = bytes;
@@ -77,7 +90,10 @@ class AiRecipesViewModel extends ChangeNotifier {
       }
 
       _debugLog('generateRecipe: gerando com ingredientes selecionados');
-      _recipe = await _repository.generateRecipe(_detectedIngredients);
+      _recipe = await _repository.generateRecipe(
+        _detectedIngredients,
+        servings: _servings,
+      );
       _debugLog('generateRecipe: receita gerada com sucesso');
       _errorMessage = null;
     } on AiFailure catch (failure) {

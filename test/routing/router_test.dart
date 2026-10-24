@@ -29,7 +29,7 @@ class _ImmediateFavoritesRepository implements FavoritesRepository {
 
 class _ImmediateAiRepository implements AiRepository {
   @override
-  Future<Recipe> generateRecipe(List<String> ingredients) =>
+  Future<Recipe> generateRecipe(List<String> ingredients, {int servings = 2}) =>
       throw UnimplementedError();
 
   @override

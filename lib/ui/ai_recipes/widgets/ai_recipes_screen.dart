@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
@@ -25,6 +26,38 @@ class AiRecipesScreen extends StatefulWidget {
 
 class _AiRecipesScreenState extends State<AiRecipesScreen> {
   final _picker = ImagePicker();
+  late final TextEditingController _servingsController;
+
+  @override
+  void initState() {
+    super.initState();
+    _servingsController = TextEditingController(
+      text: '${AiRecipesViewModel.defaultServings}',
+    );
+    _servingsController.addListener(_onServingsChanged);
+  }
+
+  void _onServingsChanged() {
+    final servings = int.tryParse(_servingsController.text);
+    if (servings != null) {
+      context.read<AiRecipesViewModel>().setServings(servings);
+    }
+  }
+
+  void _changeServings(int delta) {
+    final viewModel = context.read<AiRecipesViewModel>();
+    final next = viewModel.servings + delta;
+    if (next < AiRecipesViewModel.minServings) return;
+    _servingsController
+      ..text = '$next'
+      ..selection = TextSelection.collapsed(offset: '$next'.length);
+  }
+
+  @override
+  void dispose() {
+    _servingsController.dispose();
+    super.dispose();
+  }
 
   Future<void> _pickImage(ImageSource source) async {
     try {
@@ -129,6 +162,8 @@ class _AiRecipesScreenState extends State<AiRecipesScreen> {
             ),
             const SizedBox(height: AppSpacing.x5),
             _imageSelector(permissionViewModel),
+            const SizedBox(height: AppSpacing.x4),
+            _servingsSelector(viewModel),
             if (viewModel.foodsDetected) ...[
               const SizedBox(height: AppSpacing.x4),
               DetectedIngredients(
@@ -174,6 +209,43 @@ class _AiRecipesScreenState extends State<AiRecipesScreen> {
       ),
     );
   }
+
+  Widget _servingsSelector(AiRecipesViewModel viewModel) => Card(
+    child: Padding(
+      padding: const EdgeInsets.all(AppSpacing.x3),
+      child: Row(
+        children: [
+          IconButton(
+            onPressed: viewModel.isLoading
+                ? null
+                : () => _changeServings(-1),
+            icon: const Icon(Icons.remove),
+            tooltip: 'Diminuir quantidade de pessoas',
+          ),
+          Expanded(
+            child: TextField(
+              controller: _servingsController,
+              enabled: !viewModel.isLoading,
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              textAlign: TextAlign.center,
+              decoration: const InputDecoration(
+                labelText: 'Quantidade de pessoas',
+                prefixIcon: Icon(Icons.people_outline),
+              ),
+            ),
+          ),
+          IconButton(
+            onPressed: viewModel.isLoading
+                ? null
+                : () => _changeServings(1),
+            icon: const Icon(Icons.add),
+            tooltip: 'Aumentar quantidade de pessoas',
+          ),
+        ],
+      ),
+    ),
+  );
 
   Widget _imageSelector(PermissionViewModel? permissionViewModel) {
     final imageBytes = context.watch<AiRecipesViewModel>().imageBytes;
@@ -297,6 +369,12 @@ class _RecipeCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.x2),
             Text(recipe.description),
           ],
+          const SizedBox(height: AppSpacing.x2),
+          Text(
+            '${recipe.servings} '
+            '${recipe.servings == 1 ? 'pessoa' : 'pessoas'}',
+            style: Theme.of(context).textTheme.titleMedium,
+          ),
           const SizedBox(height: AppSpacing.x4),
           Text(
             'Ingredientes',

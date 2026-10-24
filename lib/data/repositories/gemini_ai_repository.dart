@@ -21,27 +21,31 @@ class GeminiAiRepository implements AiRepository {
   final String Function() _createRecipeId;
 
   @override
-  Future<Recipe> generateRecipe(List<String> ingredients) => _guard(
-    'generateRecipe',
-    () async {
-      if (ingredients.isEmpty ||
-          ingredients.length > 50 ||
-          ingredients.any((item) => item.trim().isEmpty || item.length > 200)) {
-        throw const AiFailure(AiFailureKind.invalidInput);
-      }
-      final normalized = _unique(ingredients);
-      final json = await service.generateJson(
-        prompt: GeminiPrompts.recipe(normalized),
-        schema: GeminiSchemas.recipe,
-      );
-      return Recipe.fromJson({
-        ...json,
-        // Identidade criada no app: o modelo não controla IDs dos favoritos.
-        'id': _createRecipeId(),
-        'source': RecipeSource.ai.name,
+  Future<Recipe> generateRecipe(List<String> ingredients, {int servings = 2}) =>
+      _guard('generateRecipe', () async {
+        if (ingredients.isEmpty ||
+            ingredients.length > 50 ||
+            ingredients.any(
+              (item) => item.trim().isEmpty || item.length > 200,
+            ) ||
+            servings < 1) {
+          throw const AiFailure(AiFailureKind.invalidInput);
+        }
+        final normalized = _unique(ingredients);
+        final json = await service.generateJson(
+          prompt: GeminiPrompts.recipe(normalized, servings),
+          schema: GeminiSchemas.recipe,
+        );
+        if (json['servings'] != servings) {
+          throw const AiFailure(AiFailureKind.invalidResponse);
+        }
+        return Recipe.fromJson({
+          ...json,
+          // Identidade criada no app: o modelo não controla IDs dos favoritos.
+          'id': _createRecipeId(),
+          'source': RecipeSource.ai.name,
+        });
       });
-    },
-  );
 
   @override
   Future<List<String>> identifyFoods({
