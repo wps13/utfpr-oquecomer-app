@@ -8,6 +8,7 @@ import 'package:o_que_comer_app/ui/ai_recipes/view_models/ai_recipes_viewmodel.d
 class _FakeAiRepository implements AiRepository {
   List<String> foods = ['tomate', 'ovo', 'cebola'];
   List<String>? generatedWith;
+  int? generatedServings;
 
   @override
   Future<List<String>> identifyFoods({
@@ -16,8 +17,12 @@ class _FakeAiRepository implements AiRepository {
   }) async => foods;
 
   @override
-  Future<Recipe> generateRecipe(List<String> ingredients) async {
+  Future<Recipe> generateRecipe(
+    List<String> ingredients, {
+    int servings = 2,
+  }) async {
     generatedWith = ingredients;
+    generatedServings = servings;
     return Recipe(
       id: 'ai_test',
       title: 'Receita teste',
@@ -25,7 +30,7 @@ class _FakeAiRepository implements AiRepository {
       ingredients: ingredients,
       steps: const ['Misture e cozinhe.'],
       preparationMinutes: 10,
-      servings: 1,
+      servings: servings,
       source: RecipeSource.ai,
     );
   }
@@ -50,8 +55,31 @@ void main() {
       await viewModel.generateRecipe();
 
       expect(repository.generatedWith, ['tomate', 'cebola']);
+      expect(repository.generatedServings, AiRecipesViewModel.defaultServings);
     },
   );
+
+  test('envia a quantidade de pessoas escolhida', () async {
+    final repository = _FakeAiRepository();
+    final viewModel = AiRecipesViewModel(repository: repository);
+    viewModel.setImage(bytes: Uint8List.fromList([1]), mimeType: 'image/jpeg');
+    viewModel.setServings(5);
+
+    await viewModel.generateRecipe();
+    await viewModel.generateRecipe();
+
+    expect(repository.generatedServings, 5);
+    expect(viewModel.recipe?.servings, 5);
+  });
+
+  test('ignora quantidade de pessoas menor que o mínimo', () {
+    final viewModel = AiRecipesViewModel(repository: _FakeAiRepository());
+
+    viewModel.setServings(AiRecipesViewModel.minServings - 1);
+    expect(viewModel.servings, AiRecipesViewModel.defaultServings);
+    viewModel.setServings(100);
+    expect(viewModel.servings, 100);
+  });
 
   test(
     'desabilita a geração quando todos os ingredientes são removidos',
