@@ -118,7 +118,13 @@ class FavoritesStorageError implements Exception {
 
 /// Implementação em memória para testes e protótipos sem persistência.
 class InMemoryFavoritesRepository implements FavoritesRepository {
-  final List<Recipe> _items = [
+  /// Sem [initial], começa com receitas de exemplo.
+  InMemoryFavoritesRepository({List<Recipe>? initial})
+    : _items = initial != null ? [...initial] : _sample();
+
+  final List<Recipe> _items;
+
+  static List<Recipe> _sample() => [
     Recipe(
       id: '1',
       title: 'Lasanha',

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:hive_ce_flutter/hive_flutter.dart';
 import 'package:provider/provider.dart';
@@ -7,6 +9,7 @@ import 'routing/router.dart';
 import 'config/ai_dependencies.dart';
 import 'config/env.dart';
 import 'config/error_handling.dart';
+import 'config/init_or_fallback.dart';
 import 'config/firebase_bootstrap.dart';
 import 'data/repositories/ai_repository.dart';
 import 'data/repositories/favorites_repository.dart';
@@ -21,9 +24,29 @@ import 'ui/favorites/view_models/favorites_viewmodel.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Hive.initFlutter();
-  final favoritesBox = await Hive.openBox<dynamic>('favorites');
-  final errorReporter = await initializeErrorReporting();
+  final ErrorReporter errorReporter = await initOrFallback(
+    initializeErrorReporting,
+    () => const DisabledErrorReporter(),
+  );
+  final FavoritesRepository favoritesRepository = await initOrFallback(
+    () async {
+      await Hive.initFlutter();
+      final box = await Hive.openBox<dynamic>('favorites');
+      return HiveFavoritesRepository(
+        box: HiveFavoritesBoxAdapter(box),
+        errorReporter: errorReporter,
+      );
+    },
+    // Sem persistência: favoritos em memória, vazios.
+    () => InMemoryFavoritesRepository(initial: const []),
+    onError: (error, stack) => unawaited(
+      errorReporter.recordError(
+        error,
+        stack,
+        reason: 'Falha ao abrir a persistência local',
+      ),
+    ),
+  );
   installErrorHandlers(errorReporter: errorReporter);
   final env = Env.fromEnvironment();
 
@@ -53,12 +76,7 @@ Future<void> main() async {
         Provider<AiRepository>(
           create: (c) => c.read<AiDependencies>().repository,
         ),
-        Provider<FavoritesRepository>(
-          create: (c) => HiveFavoritesRepository(
-            box: HiveFavoritesBoxAdapter(favoritesBox),
-            errorReporter: c.read<ErrorReporter>(),
-          ),
-        ),
+        Provider<FavoritesRepository>.value(value: favoritesRepository),
       ],
       child: const MainApp(),
     ),
