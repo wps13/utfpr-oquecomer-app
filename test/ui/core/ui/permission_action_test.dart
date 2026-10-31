@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:o_que_comer_app/data/repositories/favorites_repository.dart';
+import 'package:o_que_comer_app/data/repositories/catalog_repository.dart';
 import 'package:o_que_comer_app/data/services/permissions/permission_service.dart';
 import 'package:o_que_comer_app/domain/models/app_permission.dart';
 import 'package:o_que_comer_app/main.dart';
 import 'package:o_que_comer_app/ui/core/ui/permission_action.dart';
 import 'package:o_que_comer_app/ui/core/view_models/permission_viewmodel.dart';
 import 'package:provider/provider.dart';
+
+import '../../../../testing/fakes/fake_catalog_repository.dart';
 
 class FakePermissionService implements PermissionService {
   PermissionAccess status = PermissionAccess.denied;
@@ -72,6 +75,7 @@ void main() {
     await tester.pumpWidget(
       MultiProvider(
         providers: [
+          Provider<CatalogRepository>(create: (_) => FakeCatalogRepository()),
           Provider<FavoritesRepository>(
             create: (_) => InMemoryFavoritesRepository(),
           ),

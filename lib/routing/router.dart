@@ -4,16 +4,21 @@ import 'package:provider/provider.dart';
 
 import 'routes.dart';
 import '../data/repositories/ai_repository.dart';
+import '../data/repositories/catalog_repository.dart';
+import '../domain/models/recipe_category.dart';
 import '../ui/ai_recipes/widgets/ai_recipes_screen.dart';
 import '../ui/ai_recipes/view_models/ai_recipes_viewmodel.dart';
 
 import '../ui/catalog/widgets/catalog_screen.dart';
+import '../ui/catalog/view_models/catalog_viewmodel.dart';
 import '../ui/favorites/widgets/favorites_screen.dart';
 import '../ui/hands_free_mode/widgets/hands_free_mode_screen.dart';
 import '../ui/home/widgets/home_screen.dart';
+import '../ui/home/view_models/home_viewmodel.dart';
 import '../ui/inventory/widgets/inventory_screen.dart';
 import '../ui/recipe_details/widgets/recipe_details_screen.dart';
 import '../ui/search/widgets/search_screen.dart';
+import '../ui/search/view_models/search_viewmodel.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -31,7 +36,11 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: Routes.home,
           builder: (context, state) {
-            return const HomeScreen();
+            return ChangeNotifierProvider(
+              create: (context) =>
+                  HomeViewModel(repository: context.read<CatalogRepository>()),
+              child: const HomeScreen(),
+            );
           },
         ),
         GoRoute(
@@ -53,7 +62,12 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: Routes.search,
           builder: (context, state) {
-            return const SearchScreen();
+            return ChangeNotifierProvider(
+              create: (context) => SearchViewModel(
+                repository: context.read<CatalogRepository>(),
+              ),
+              child: const SearchScreen(),
+            );
           },
         ),
         GoRoute(
@@ -67,7 +81,15 @@ final GoRouter router = GoRouter(
     GoRoute(
       path: Routes.catalog,
       builder: (context, state) {
-        return const CatalogScreen();
+        final type = state.uri.queryParameters['categoria'];
+        return ChangeNotifierProvider(
+          key: ValueKey(type),
+          create: (context) => CatalogViewModel(
+            repository: context.read<CatalogRepository>(),
+            category: type == null ? null : RecipeCategory(type),
+          ),
+          child: const CatalogScreen(),
+        );
       },
     ),
     GoRoute(

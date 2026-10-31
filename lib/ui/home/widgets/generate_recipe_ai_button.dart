@@ -22,10 +22,12 @@ class GenerateRecipeAiButton extends StatelessWidget {
         child: InkWell(
           onTap: () => context.go(Routes.aiRecipe),
           borderRadius: AppRadius.borderXl,
-          child: SizedBox(
+          child: Container(
             width: double.infinity,
-            height: 108,
+            constraints: const BoxConstraints(minHeight: 108),
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.x4),
             child: Column(
+              mainAxisSize: MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Container(

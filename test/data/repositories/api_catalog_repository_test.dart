@@ -120,6 +120,177 @@ void main() {
   setUp(() => reporter = _Reporter());
 
   test(
+    'carrega todas as páginas para a busca local sem omitir resultados',
+    () async {
+      final repository = build((options) async {
+        if (options.queryParameters['page'] == 1) {
+          return _response(
+            _page(
+              List.generate(100, (i) => _recipe(id: i + 1)),
+              limit: 100,
+              total: 101,
+            ),
+          );
+        }
+        return _response(
+          _page([_recipe(id: 101)], page: 2, limit: 100, total: 101),
+        );
+      });
+      final recipes = await repository.getAllRecipes();
+      expect(recipes, hasLength(101));
+      expect(recipes.last.id, '101');
+      expect(
+        adapter.requests.map((request) => request.queryParameters['page']),
+        [1, 2],
+      );
+      expect(() => recipes.clear(), throwsUnsupportedError);
+    },
+  );
+
+  test('catálogo completo sem receitas retorna lista vazia', () async {
+    final repository = build((_) async => _response(_page([], limit: 100)));
+    expect(await repository.getAllRecipes(), isEmpty);
+    expect(reporter.errors, isEmpty);
+  });
+
+  test(
+    'falha em página posterior não apresenta um catálogo incompleto',
+    () async {
+      final repository = build((options) async {
+        if (options.queryParameters['page'] == 2) {
+          throw DioException.connectionError(
+            requestOptions: options,
+            reason: 'offline',
+          );
+        }
+        return _response(
+          _page(
+            List.generate(100, (i) => _recipe(id: i + 1)),
+            limit: 100,
+            total: 101,
+          ),
+        );
+      });
+      await expectLater(
+        repository.getAllRecipes(),
+        throwsA(isA<NoConnectionFailure>()),
+      );
+      expect(reporter.errors, isEmpty);
+    },
+  );
+
+  test(
+    'descobre categorias distintas inclusive após a primeira página',
+    () async {
+      final repository = build((options) async {
+        if (options.queryParameters['page'] == 1) {
+          return _response(
+            _page(
+              List.generate(100, (index) => _recipe(id: index + 1)),
+              limit: 100,
+              total: 102,
+            ),
+          );
+        }
+        return _response(
+          _page(
+            [
+              {..._recipe(id: 101), 'tipo': 'doce'},
+              {..._recipe(id: 102), 'tipo': 'agridoce'},
+            ],
+            page: 2,
+            limit: 100,
+            total: 102,
+          ),
+        );
+      });
+      final categories = await repository.getCategories();
+      expect(categories.map((item) => item.id), [
+        'salgado',
+        'doce',
+        'agridoce',
+      ]);
+      expect(adapter.requests.map((item) => item.queryParameters['page']), [
+        1,
+        2,
+      ]);
+    },
+  );
+
+  test('catálogo vazio retorna categorias vazias', () async {
+    final repository = build((_) async => _response(_page([], limit: 100)));
+    expect(await repository.getCategories(), isEmpty);
+    expect(reporter.errors, isEmpty);
+  });
+
+  test(
+    'tipo retornado pelo catálogo não depende de lista fixa no app',
+    () async {
+      final repository = build(
+        (_) async => _response(
+          _page([
+            {..._recipe(), 'tipo': 'nova categoria'},
+          ], limit: 100),
+        ),
+      );
+      expect((await repository.getCategories()).single.label, 'Nova categoria');
+    },
+  );
+
+  test('categoria ausente é erro de contrato, sem ocultar receitas', () async {
+    final repository = build(
+      (_) async => _response(
+        _page([
+          {..._recipe(), 'tipo': null},
+        ], limit: 100),
+      ),
+    );
+    await expectLater(
+      repository.getCategories(),
+      throwsA(isA<InvalidResponseFailure>()),
+    );
+    expect(reporter.errors, hasLength(1));
+  });
+
+  test('consulta categoria pela rota pública e converte os dados', () async {
+    final repository = build(
+      (_) async => _response([
+        {..._recipe(), 'tipo': 'doce'},
+      ]),
+    );
+    final recipes = await repository.getRecipesByCategory(' Doce ');
+    expect(adapter.requests.single.path, '/receitas/tipo/doce');
+    expect(recipes.single.type, 'doce');
+    expect(recipes.single.preparationMinutes, isNull);
+  });
+
+  test('categoria sem receitas retorna lista vazia', () async {
+    final repository = build((_) async => _response([]));
+    expect(await repository.getRecipesByCategory('doce'), isEmpty);
+    expect(reporter.errors, isEmpty);
+  });
+
+  test(
+    'não apresenta receitas de outra categoria como resultado válido',
+    () async {
+      final repository = build((_) async => _response([_recipe()]));
+      await expectLater(
+        repository.getRecipesByCategory('doce'),
+        throwsA(isA<InvalidResponseFailure>()),
+      );
+      expect(reporter.errors, hasLength(1));
+    },
+  );
+
+  test('categoria com envelope inválido produz erro de domínio', () async {
+    final repository = build((_) async => _response({'items': []}));
+    await expectLater(
+      repository.getRecipesByCategory('doce'),
+      throwsA(isA<InvalidResponseFailure>()),
+    );
+  });
+
+  test(
     'lista pelo cliente HTTP configurado e converte o modelo compartilhado',
     () async {
       final repository = build((_) async => _response(_page([_recipe()])));
@@ -296,6 +467,10 @@ void main() {
   );
 
   final operations = <String, Future<Object> Function(CatalogRepository)>{
+    'catálogo completo': (repository) => repository.getAllRecipes(),
+    'categorias': (repository) => repository.getCategories(),
+    'receitas da categoria': (repository) =>
+        repository.getRecipesByCategory('doce'),
     'listar': (repository) => repository.listRecipes(),
     'buscar nome': (repository) => repository.searchByName('bolo'),
     'buscar ingrediente': (repository) => repository.searchByIngredient('ovos'),

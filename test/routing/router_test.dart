@@ -3,12 +3,15 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:o_que_comer_app/data/repositories/ai_repository.dart';
+import 'package:o_que_comer_app/data/repositories/catalog_repository.dart';
 import 'package:o_que_comer_app/data/repositories/favorites_repository.dart';
 import 'package:o_que_comer_app/domain/models/recipe.dart';
 import 'package:o_que_comer_app/routing/router.dart';
 import 'package:o_que_comer_app/routing/routes.dart';
 import 'package:o_que_comer_app/ui/favorites/view_models/favorites_viewmodel.dart';
 import 'package:provider/provider.dart';
+
+import '../../testing/fakes/fake_catalog_repository.dart';
 
 class _ImmediateFavoritesRepository implements FavoritesRepository {
   @override
@@ -59,7 +62,19 @@ void main() {
         value: favoritesViewModel,
         child: Provider<AiRepository>.value(
           value: _ImmediateAiRepository(),
-          child: MaterialApp.router(routerConfig: router),
+          child: Provider<CatalogRepository>(
+            create: (_) => FakeCatalogRepository()
+              ..recipes = [
+                Recipe(
+                  id: '42',
+                  title: 'Bolo de cenoura',
+                  ingredients: ['Cenoura'],
+                  steps: ['Asse.'],
+                  source: RecipeSource.catalog,
+                ),
+              ],
+            child: MaterialApp.router(routerConfig: router),
+          ),
         ),
       ),
     );
@@ -74,7 +89,7 @@ void main() {
   testWidgets('starts at home inside the main shell', (tester) async {
     await pumpRouter(tester);
 
-    expect(find.text('Catálogo'), findsOneWidget);
+    expect(find.text('Categorias'), findsOneWidget);
     expect(find.text('Gerar com IA'), findsOneWidget);
     expect(find.byType(NavigationBar), findsOneWidget);
     expect(
@@ -101,7 +116,7 @@ void main() {
     final shellRoutes = {
       Routes.aiRecipe: 'O que tem na geladeira?',
       Routes.inventory: 'Despensa',
-      Routes.search: 'Abrir detalhes da receita',
+      Routes.search: 'Buscar receitas',
     };
 
     for (final entry in shellRoutes.entries) {
@@ -115,7 +130,7 @@ void main() {
     await pumpRouter(tester);
     await goTo(tester, Routes.catalog);
 
-    expect(find.text('Catálogo'), findsNWidgets(2));
+    expect(find.text('Catálogo'), findsOneWidget);
     expect(find.byType(NavigationBar), findsNothing);
   });
 
@@ -126,7 +141,7 @@ void main() {
 
     await tester.tap(find.text('Buscar'));
     await tester.pumpAndSettle();
-    expect(find.text('Abrir detalhes da receita'), findsOneWidget);
+    expect(find.text('Buscar receitas'), findsOneWidget);
     expect(
       tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
       1,
@@ -164,11 +179,15 @@ void main() {
     expect(find.text('Detalhes da receita'), findsNothing);
   });
 
-  testWidgets('search action opens the default recipe details', (tester) async {
+  testWidgets('search result opens the selected recipe details', (
+    tester,
+  ) async {
     await pumpRouter(tester);
     await goTo(tester, Routes.search);
 
-    await tester.tap(find.text('Abrir detalhes da receita'));
+    await tester.ensureVisible(find.text('Bolo de cenoura'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Bolo de cenoura'));
     await tester.pumpAndSettle();
 
     expect(find.text('Detalhes da receita'), findsOneWidget);

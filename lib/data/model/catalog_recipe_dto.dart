@@ -64,6 +64,7 @@ class CatalogRecipeDto {
     ingredients: [ingredients],
     steps: [preparation],
     source: RecipeSource.catalog,
+    preparationMinutes: null,
     imageUrl: imageUrl,
     type: type,
     createdAt: createdAt,

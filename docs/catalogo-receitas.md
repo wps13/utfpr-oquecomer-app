@@ -67,9 +67,10 @@ busca por nome aceitam página positiva e limite entre 1 e 100.
   quantidades e instruções ao tentar adivinhar separadores.
 - `IngredientesBase[].nomesIngrediente` é convertido para `baseIngredients`.
 - `link_imagem`, `tipo` e `created_at` alimentam os campos opcionais do modelo.
-- A API não fornece duração nem rendimento. O DTO mantém os valores padrão
-  atuais do modelo (`preparationMinutes: 1`, `servings: 1`); esses valores não
-  representam informações confirmadas pelo catálogo.
+- A API não fornece duração nem rendimento. A duração do catálogo é representada
+  por `preparationMinutes: null` e aparece como “Tempo não informado” na UI.
+  O rendimento mantém o padrão atual `servings: 1`, que não é uma informação
+  confirmada pelo catálogo. Receitas de IA continuam exigindo duração positiva.
 
 A serialização usada na persistência dos favoritos permanece a mesma. Consultar
 uma receita não a salva automaticamente.
@@ -84,9 +85,10 @@ pelo construtor, por exemplo:
 CatalogViewModel(repository: context.read<CatalogRepository>())
 ```
 
-`CatalogViewModel` é apenas um exemplo de composição; as telas e ViewModels
-de catálogo, busca e detalhe ficam para os respectivos cards. A implementação
-disponível é `ApiCatalogRepository`.
+As telas e ViewModels de busca e detalhe ficam para os respectivos cards.
+A tela de catálogo e suas
+ViewModels são implementadas na APP-25, conforme o [guia de categorias](categorias-catalogo.md).
+A implementação do repositório é `ApiCatalogRepository`.
 
 ## Falhas de domínio e telemetria
 
