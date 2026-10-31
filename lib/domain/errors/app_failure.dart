@@ -44,6 +44,18 @@ final class CancelledFailure extends AppFailure {
   const CancelledFailure([super.message = 'Requisição cancelada']);
 }
 
+/// Dados informados ao repositório não permitem uma requisição válida.
+final class InvalidInputFailure extends AppFailure {
+  const InvalidInputFailure([super.message = 'Dados de consulta inválidos']);
+}
+
+/// Corpo vazio, JSON inválido ou resposta incompatível com o contrato da API.
+final class InvalidResponseFailure extends AppFailure {
+  const InvalidResponseFailure([
+    super.message = 'O servidor retornou uma resposta inválida',
+  ]);
+}
+
 /// Qualquer falha não prevista. É reportada ao `ErrorReporter`.
 final class UnexpectedFailure extends AppFailure {
   const UnexpectedFailure(this.cause, [this.stackTrace])

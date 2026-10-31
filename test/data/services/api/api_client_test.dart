@@ -30,13 +30,17 @@ class _FakeAdapter implements HttpClientAdapter {
 
 class _SpyReporter implements ErrorReporter {
   final reported = <Object>[];
+  bool unavailable = false;
 
   @override
   Future<void> report(
     Object error,
     StackTrace? stackTrace, {
     bool fatal = false,
-  }) async => reported.add(error);
+  }) async {
+    if (unavailable) throw StateError('Destino indisponível');
+    reported.add(error);
+  }
 }
 
 ResponseBody _json(Object body, int status) => ResponseBody.fromString(
@@ -123,5 +127,14 @@ void main() {
       throwsA(isA<UnexpectedFailure>()),
     );
     expect(reporter.reported, hasLength(1));
+  });
+
+  test('reporter failure does not replace the HTTP domain failure', () async {
+    reporter.unavailable = true;
+    final client = build(_FakeAdapter((_) async => throw StateError('boom')));
+    await expectLater(
+      client.get<dynamic>('/x'),
+      throwsA(isA<UnexpectedFailure>()),
+    );
   });
 }

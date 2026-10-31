@@ -6,6 +6,7 @@ import '../../../domain/errors/app_failure.dart';
 AppFailure mapDioException(DioException e) {
   final inner = e.error;
   if (inner is AppFailure) return inner;
+  if (inner is FormatException) return const InvalidResponseFailure();
 
   switch (e.type) {
     case DioExceptionType.connectionTimeout:

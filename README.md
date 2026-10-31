@@ -6,6 +6,8 @@ Configuração, uso e validação do [Firebase e Crashlytics (APP-19)](docs/fire
 
 Configuração, contratos e testes da [integração Gemini (APP-31)](docs/gemini.md).
 
+Configuração, contratos e testes do [catálogo de receitas (APP-24)](docs/catalogo-receitas.md).
+
 Configuração e uso do serviço de permissões: [APP-23 / TT14](docs/permissoes.md).
 
 Preparação do Xcode e execução no iOS: [guia de desenvolvimento](docs/desenvolvimento-ios.md).
@@ -170,8 +172,10 @@ A `FavoritesViewModel` (`lib/ui/favorites/`) é o exemplo a ser seguido.
 - Testes de ViewModel rodam sem renderizar widgets, com repositórios falsos de `testing/fakes/`.
 ## Configuração de chaves e URLs
 
-Chaves e URLs não ficam no código. Copie `env.example.json` para `env.json`
-(ignorado pelo Git) e rode:
+As chaves são fornecidas por arquivos locais ou `--dart-define`. As URLs públicas
+do catálogo e do Gemini têm valores padrão, com substituição opcional por
+`CATALOG_BASE_URL` e `GEMINI_BASE_URL`. Para personalizar a configuração, copie
+`env.example.json` para `env.json` (ignorado pelo Git) e rode:
 
 ```bash
 flutter run \
