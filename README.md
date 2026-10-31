@@ -10,6 +10,8 @@ Configuração, contratos e testes do [catálogo de receitas (APP-24)](docs/cata
 
 Fluxo da página inicial e [seleção de receitas por categoria (APP-25)](docs/categorias-catalogo.md).
 
+Uso e validação da [busca de receitas por nome (APP-26)](docs/busca-catalogo.md).
+
 Configuração e uso do serviço de permissões: [APP-23 / TT14](docs/permissoes.md).
 
 Preparação do Xcode e execução no iOS: [guia de desenvolvimento](docs/desenvolvimento-ios.md).

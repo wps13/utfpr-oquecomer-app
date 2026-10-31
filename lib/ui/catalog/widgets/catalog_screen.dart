@@ -7,7 +7,7 @@ import 'package:provider/provider.dart';
 import '../../../routing/routes.dart';
 import '../../core/themes/spacing.dart';
 import '../../core/ui/load_feedback.dart';
-import '../../core/ui/recipe_card.dart';
+import '../../core/ui/recipe_list.dart';
 import '../../core/view_state.dart';
 import '../view_models/catalog_viewmodel.dart';
 
@@ -78,14 +78,9 @@ class _CatalogScreenState extends State<CatalogScreen> {
         ],
       );
     }
-    return ListView.separated(
-      padding: const EdgeInsets.all(AppSpacing.x4),
-      itemCount: vm.recipes.length,
-      separatorBuilder: (_, index) => const SizedBox(height: AppSpacing.x4),
-      itemBuilder: (context, index) => RecipeCard(
-        recipe: vm.recipes[index],
-        onTap: () => context.push(Routes.recipeDetails(vm.recipes[index].id)),
-      ),
+    return RecipeList(
+      recipes: vm.recipes,
+      onSelected: (recipe) => context.push(Routes.recipeDetails(recipe.id)),
     );
   }
 }

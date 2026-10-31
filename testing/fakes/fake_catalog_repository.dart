@@ -7,8 +7,10 @@ class FakeCatalogRepository implements CatalogRepository {
   List<Recipe> recipes = const [];
   Future<List<RecipeCategory>> Function()? loadCategories;
   Future<List<Recipe>> Function(String)? loadRecipes;
+  Future<List<Recipe>> Function()? loadAllRecipes;
   int categoryCalls = 0;
   int listCalls = 0;
+  int allRecipesCalls = 0;
   final requestedCategories = <String>[];
 
   @override
@@ -29,6 +31,12 @@ class FakeCatalogRepository implements CatalogRepository {
   Future<List<Recipe>> listRecipes({int page = 1, int limit = 20}) async {
     listCalls++;
     return recipes;
+  }
+
+  @override
+  Future<List<Recipe>> getAllRecipes() async {
+    allRecipesCalls++;
+    return loadAllRecipes == null ? recipes : await loadAllRecipes!();
   }
 
   @override
