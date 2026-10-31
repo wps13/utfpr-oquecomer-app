@@ -14,6 +14,8 @@ Uso e validação da [busca de receitas por nome (APP-26)](docs/busca-catalogo.m
 
 Configuração e uso do serviço de permissões: [APP-23 / TT14](docs/permissoes.md).
 
+Configuração e uso do serviço de localização: [localização](docs/localizacao.md).
+
 Preparação do Xcode e execução no iOS: [guia de desenvolvimento](docs/desenvolvimento-ios.md).
 
 ## Executar localmente

@@ -5,7 +5,9 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
+import '../../../data/services/location/location_service.dart';
 import '../../../data/services/permissions/permission_service.dart';
+import '../../../domain/errors/app_failure.dart';
 import '../../../domain/models/app_permission.dart';
 import '../../../domain/models/recipe.dart';
 import '../../../routing/routes.dart';
@@ -16,6 +18,9 @@ import '../../core/themes/radius.dart';
 import '../../core/themes/spacing.dart';
 import '../view_models/ai_recipes_viewmodel.dart';
 import 'detected_ingredients.dart';
+import 'location_button.dart';
+import 'location_permission_dialog.dart';
+import 'location_unavailable_dialog.dart';
 
 class AiRecipesScreen extends StatefulWidget {
   const AiRecipesScreen({super.key});
@@ -27,6 +32,8 @@ class AiRecipesScreen extends StatefulWidget {
 class _AiRecipesScreenState extends State<AiRecipesScreen> {
   final _picker = ImagePicker();
   late final TextEditingController _servingsController;
+  String? _location;
+  bool _locationLoading = false;
 
   @override
   void initState() {
@@ -126,6 +133,7 @@ class _AiRecipesScreenState extends State<AiRecipesScreen> {
     final permissionViewModel = permissionService == null
         ? null
         : PermissionViewModel(permissionService: permissionService);
+    final locationService = context.read<LocationService?>();
     return Scaffold(
       appBar: AppBar(
         title: const Text('Receita com IA'),
@@ -162,13 +170,17 @@ class _AiRecipesScreenState extends State<AiRecipesScreen> {
             ),
             const SizedBox(height: AppSpacing.x5),
             _imageSelector(permissionViewModel),
-            if (viewModel.foodsDetected) ...[
-              const SizedBox(height: AppSpacing.x4),
-              DetectedIngredients(
-                ingredients: viewModel.detectedIngredients,
-                onRemove: viewModel.removeIngredient,
-              ),
-            ],
+            const SizedBox(height: AppSpacing.x2),
+            LocationButton(
+              location: _location,
+              loading: _locationLoading,
+              onPressed:
+                  permissionViewModel != null &&
+                      locationService != null &&
+                      !_locationLoading
+                  ? () => _requestLocation(permissionViewModel, locationService)
+                  : null,
+            ),
             const SizedBox(height: AppSpacing.x4),
             _servingsSelector(viewModel),
             if (viewModel.foodsDetected) ...[
@@ -318,6 +330,48 @@ class _AiRecipesScreenState extends State<AiRecipesScreen> {
         ),
       ),
     );
+  }
+
+  Future<void> _requestLocation(
+    PermissionViewModel permissionViewModel,
+    LocationService locationService,
+  ) async {
+    if (_locationLoading) return;
+    setState(() => _locationLoading = true);
+    try {
+      var access = await permissionViewModel.check(
+        AppPermission.locationWhenInUse,
+      );
+      if (!mounted) return;
+      if (access == PermissionAccess.denied) {
+        final confirmed = await LocationPermissionDialog.show(context);
+        if (confirmed == false && mounted) {
+          await LocationUnavailableDialog.show(
+            context,
+            const LocationPermissionDeniedFailure(),
+          );
+        }
+        if (confirmed != true || !mounted) return;
+        access = await permissionViewModel.request(
+          AppPermission.locationWhenInUse,
+        );
+        if (!mounted) return;
+      }
+      if (!access.isAuthorized) {
+        await LocationUnavailableDialog.show(
+          context,
+          const LocationPermissionDeniedFailure(),
+        );
+        return;
+      }
+
+      final location = await locationService.getCurrentLocation();
+      if (mounted) setState(() => _location = location);
+    } on LocationFailure catch (failure) {
+      if (mounted) await LocationUnavailableDialog.show(context, failure);
+    } finally {
+      if (mounted) setState(() => _locationLoading = false);
+    }
   }
 }
 

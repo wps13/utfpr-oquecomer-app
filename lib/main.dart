@@ -19,6 +19,7 @@ import 'data/services/api/api_client.dart';
 import 'data/services/crash/error_reporter.dart' as http_errors;
 import 'data/services/errors/error_reporter.dart';
 import 'data/services/errors/http_error_reporter.dart';
+import 'data/services/location/location_service.dart';
 import 'data/services/permissions/permission_handler_service.dart';
 import 'data/services/permissions/permission_service.dart';
 import 'ui/core/themes/theme.dart';
@@ -63,6 +64,7 @@ Future<void> main() async {
               HttpErrorReporter(errorReporter: c.read<ErrorReporter>()),
         ),
         Provider<PermissionService>(create: (_) => PermissionHandlerService()),
+        Provider<LocationService>(create: (_) => DeviceLocationService()),
         Provider<CatalogApiClient>(
           create: (c) =>
               CatalogApiClient(env, c.read<http_errors.ErrorReporter>()),
