@@ -63,7 +63,16 @@ void main() {
         child: Provider<AiRepository>.value(
           value: _ImmediateAiRepository(),
           child: Provider<CatalogRepository>(
-            create: (_) => FakeCatalogRepository(),
+            create: (_) => FakeCatalogRepository()
+              ..recipes = [
+                Recipe(
+                  id: '42',
+                  title: 'Bolo de cenoura',
+                  ingredients: ['Cenoura'],
+                  steps: ['Asse.'],
+                  source: RecipeSource.catalog,
+                ),
+              ],
             child: MaterialApp.router(routerConfig: router),
           ),
         ),
@@ -107,7 +116,7 @@ void main() {
     final shellRoutes = {
       Routes.aiRecipe: 'O que tem na geladeira?',
       Routes.inventory: 'Despensa',
-      Routes.search: 'Abrir detalhes da receita',
+      Routes.search: 'Buscar receitas',
     };
 
     for (final entry in shellRoutes.entries) {
@@ -132,7 +141,7 @@ void main() {
 
     await tester.tap(find.text('Buscar'));
     await tester.pumpAndSettle();
-    expect(find.text('Abrir detalhes da receita'), findsOneWidget);
+    expect(find.text('Buscar receitas'), findsOneWidget);
     expect(
       tester.widget<NavigationBar>(find.byType(NavigationBar)).selectedIndex,
       1,
@@ -170,11 +179,15 @@ void main() {
     expect(find.text('Detalhes da receita'), findsNothing);
   });
 
-  testWidgets('search action opens the default recipe details', (tester) async {
+  testWidgets('search result opens the selected recipe details', (
+    tester,
+  ) async {
     await pumpRouter(tester);
     await goTo(tester, Routes.search);
 
-    await tester.tap(find.text('Abrir detalhes da receita'));
+    await tester.ensureVisible(find.text('Bolo de cenoura'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Bolo de cenoura'));
     await tester.pumpAndSettle();
 
     expect(find.text('Detalhes da receita'), findsOneWidget);

@@ -72,6 +72,22 @@ class ApiCatalogRepository implements CatalogRepository {
       });
 
   @override
+  Future<List<Recipe>> getAllRecipes() => _guard('getAllRecipes', () async {
+    final recipes = <Recipe>[];
+    var page = 1;
+    while (true) {
+      final result = await _fetchPage(
+        '/receitas/todas',
+        page: page,
+        limit: 100,
+      );
+      recipes.addAll(result.items.map((item) => item.toRecipe()));
+      if (!result.hasNextPage) return List.unmodifiable(recipes);
+      page++;
+    }
+  });
+
+  @override
   Future<List<Recipe>> searchByName(
     String name, {
     int page = 1,

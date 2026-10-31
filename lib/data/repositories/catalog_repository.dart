@@ -9,6 +9,9 @@ abstract interface class CatalogRepository {
 
   Future<List<Recipe>> listRecipes({int page = 1, int limit = 20});
 
+  /// Consulta todas as páginas para filtros locais sem omitir receitas.
+  Future<List<Recipe>> getAllRecipes();
+
   Future<List<Recipe>> searchByName(
     String name, {
     int page = 1,

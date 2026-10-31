@@ -18,6 +18,7 @@ import '../ui/home/view_models/home_viewmodel.dart';
 import '../ui/inventory/widgets/inventory_screen.dart';
 import '../ui/recipe_details/widgets/recipe_details_screen.dart';
 import '../ui/search/widgets/search_screen.dart';
+import '../ui/search/view_models/search_viewmodel.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -61,7 +62,12 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: Routes.search,
           builder: (context, state) {
-            return const SearchScreen();
+            return ChangeNotifierProvider(
+              create: (context) => SearchViewModel(
+                repository: context.read<CatalogRepository>(),
+              ),
+              child: const SearchScreen(),
+            );
           },
         ),
         GoRoute(

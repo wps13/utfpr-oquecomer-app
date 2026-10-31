@@ -120,6 +120,66 @@ void main() {
   setUp(() => reporter = _Reporter());
 
   test(
+    'carrega todas as páginas para a busca local sem omitir resultados',
+    () async {
+      final repository = build((options) async {
+        if (options.queryParameters['page'] == 1) {
+          return _response(
+            _page(
+              List.generate(100, (i) => _recipe(id: i + 1)),
+              limit: 100,
+              total: 101,
+            ),
+          );
+        }
+        return _response(
+          _page([_recipe(id: 101)], page: 2, limit: 100, total: 101),
+        );
+      });
+      final recipes = await repository.getAllRecipes();
+      expect(recipes, hasLength(101));
+      expect(recipes.last.id, '101');
+      expect(
+        adapter.requests.map((request) => request.queryParameters['page']),
+        [1, 2],
+      );
+      expect(() => recipes.clear(), throwsUnsupportedError);
+    },
+  );
+
+  test('catálogo completo sem receitas retorna lista vazia', () async {
+    final repository = build((_) async => _response(_page([], limit: 100)));
+    expect(await repository.getAllRecipes(), isEmpty);
+    expect(reporter.errors, isEmpty);
+  });
+
+  test(
+    'falha em página posterior não apresenta um catálogo incompleto',
+    () async {
+      final repository = build((options) async {
+        if (options.queryParameters['page'] == 2) {
+          throw DioException.connectionError(
+            requestOptions: options,
+            reason: 'offline',
+          );
+        }
+        return _response(
+          _page(
+            List.generate(100, (i) => _recipe(id: i + 1)),
+            limit: 100,
+            total: 101,
+          ),
+        );
+      });
+      await expectLater(
+        repository.getAllRecipes(),
+        throwsA(isA<NoConnectionFailure>()),
+      );
+      expect(reporter.errors, isEmpty);
+    },
+  );
+
+  test(
     'descobre categorias distintas inclusive após a primeira página',
     () async {
       final repository = build((options) async {
@@ -407,6 +467,7 @@ void main() {
   );
 
   final operations = <String, Future<Object> Function(CatalogRepository)>{
+    'catálogo completo': (repository) => repository.getAllRecipes(),
     'categorias': (repository) => repository.getCategories(),
     'receitas da categoria': (repository) =>
         repository.getRecipesByCategory('doce'),
