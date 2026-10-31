@@ -75,7 +75,11 @@ class ApiClient {
   Future<T> _request<T>(Future<Response<T>> Function() send) async {
     try {
       final data = (await send()).data;
-      if (data == null) throw const UnexpectedFailure('Resposta sem corpo');
+      if (data == null) {
+        throw const InvalidResponseFailure(
+          'O servidor retornou uma resposta vazia',
+        );
+      }
       return data;
     } on AppFailure catch (f) {
       await _reportIfUnexpected(f);
@@ -93,15 +97,28 @@ class ApiClient {
 
   Future<void> _reportIfUnexpected(AppFailure failure) async {
     if (failure is UnexpectedFailure) {
-      await errorReporter.report(failure.cause ?? failure, failure.stackTrace);
+      try {
+        await errorReporter.report(
+          failure.cause ?? failure,
+          failure.stackTrace,
+        );
+      } on Object {
+        // A telemetria não pode substituir a falha da requisição.
+      }
     }
   }
+
+  void close() => _dio.close();
 }
 
 /// API do catálogo.
 class CatalogApiClient extends ApiClient {
-  CatalogApiClient(Env env, ErrorReporter reporter)
-    : super(baseUrl: env.catalogBaseUrl, errorReporter: reporter);
+  CatalogApiClient(
+    Env env,
+    ErrorReporter reporter, {
+    super.enableLogs,
+    super.httpClientAdapter,
+  }) : super(baseUrl: env.catalogBaseUrl, errorReporter: reporter);
 }
 
 /// API de IA (Gemini). A chave vai no header, nunca na URL.
