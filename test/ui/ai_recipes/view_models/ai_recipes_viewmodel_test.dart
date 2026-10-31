@@ -9,6 +9,7 @@ class _FakeAiRepository implements AiRepository {
   List<String> foods = ['tomate', 'ovo', 'cebola'];
   List<String>? generatedWith;
   int? generatedServings;
+  String? generatedLocation;
 
   @override
   Future<List<String>> identifyFoods({
@@ -20,9 +21,11 @@ class _FakeAiRepository implements AiRepository {
   Future<Recipe> generateRecipe(
     List<String> ingredients, {
     int servings = 2,
+    String? location,
   }) async {
     generatedWith = ingredients;
     generatedServings = servings;
+    generatedLocation = location;
     return Recipe(
       id: 'ai_test',
       title: 'Receita teste',
@@ -70,6 +73,18 @@ void main() {
 
     expect(repository.generatedServings, 5);
     expect(viewModel.recipe?.servings, 5);
+  });
+
+  test('envia a localização regional selecionada', () async {
+    final repository = _FakeAiRepository();
+    final viewModel = AiRecipesViewModel(repository: repository);
+    viewModel.setImage(bytes: Uint8List.fromList([1]), mimeType: 'image/jpeg');
+    viewModel.setLocation('Curitiba, PR');
+
+    await viewModel.generateRecipe();
+    await viewModel.generateRecipe();
+
+    expect(repository.generatedLocation, 'Curitiba, PR');
   });
 
   test('ignora quantidade de pessoas menor que o mínimo', () {

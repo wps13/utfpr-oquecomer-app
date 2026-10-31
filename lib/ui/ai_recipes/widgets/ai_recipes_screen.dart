@@ -231,13 +231,18 @@ class _AiRecipesScreenState extends State<AiRecipesScreen> {
 
   Widget _servingsSelector(AiRecipesViewModel viewModel) => Card(
     child: Padding(
-      padding: const EdgeInsets.all(AppSpacing.x3),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.x2,
+        vertical: AppSpacing.x3,
+      ),
       child: Row(
         children: [
           IconButton(
             onPressed: viewModel.isLoading ? null : () => _changeServings(-1),
-            icon: const Icon(Icons.remove),
+            icon: const Icon(Icons.remove, size: 20),
             tooltip: 'Diminuir quantidade de pessoas',
+            iconSize: 20,
+            visualDensity: VisualDensity.compact,
           ),
           Expanded(
             child: TextField(
@@ -247,15 +252,23 @@ class _AiRecipesScreenState extends State<AiRecipesScreen> {
               inputFormatters: [FilteringTextInputFormatter.digitsOnly],
               textAlign: TextAlign.center,
               decoration: const InputDecoration(
+                isDense: true,
                 labelText: 'Quantidade de pessoas',
-                prefixIcon: Icon(Icons.people_outline),
+                prefixIcon: Icon(Icons.people_outline, size: 20),
+                prefixIconConstraints: BoxConstraints(
+                  minWidth: 36,
+                  minHeight: 36,
+                ),
+                contentPadding: EdgeInsets.symmetric(vertical: 8),
               ),
             ),
           ),
           IconButton(
             onPressed: viewModel.isLoading ? null : () => _changeServings(1),
-            icon: const Icon(Icons.add),
+            icon: const Icon(Icons.add, size: 20),
             tooltip: 'Aumentar quantidade de pessoas',
+            iconSize: 20,
+            visualDensity: VisualDensity.compact,
           ),
         ],
       ),
@@ -366,9 +379,16 @@ class _AiRecipesScreenState extends State<AiRecipesScreen> {
       }
 
       final location = await locationService.getCurrentLocation();
-      if (mounted) setState(() => _location = location);
+      if (mounted) {
+        setState(() => _location = location);
+        context.read<AiRecipesViewModel>().setLocation(location);
+      }
     } on LocationFailure catch (failure) {
-      if (mounted) await LocationUnavailableDialog.show(context, failure);
+      if (mounted) {
+        setState(() => _location = null);
+        context.read<AiRecipesViewModel>().setLocation(null);
+        await LocationUnavailableDialog.show(context, failure);
+      }
     } finally {
       if (mounted) setState(() => _locationLoading = false);
     }

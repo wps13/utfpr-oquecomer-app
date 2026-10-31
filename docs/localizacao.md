@@ -24,7 +24,15 @@ Todos esses casos devem ser tratados pela ViewModel sem deixar a exceção chega
 O serviço usa o geocodificador nativo por meio dos pacotes `geolocator` e
 `geocoding`. O aplicativo não exibe mapas e, por isso, não requer Google Maps
 SDK, API key ou configuração no Google Cloud. A localização obtida é usada
-somente como contexto de cidade e estado no prompt.
+somente como contexto de cidade e estado no prompt de geração da receita.
+Quando a região está disponível, o modelo adapta ingredientes, costumes e
+sabores regionais. A identificação dos alimentos não depende da localização.
+
+Na tela de receita com IA, a solicitação de localização ocorre somente quando
+o usuário toca em “Usar minha localização”. Se a permissão for recusada, o
+serviço estiver desativado ou a localização não puder ser convertida em cidade
+e estado, um aviso é exibido e a receita continua podendo ser gerada sem filtro
+regional.
 
 A geocodificação reversa depende do backend disponível no aparelho e de conexão
 com a internet; em aparelhos sem esse backend, como alguns modelos Huawei, ela

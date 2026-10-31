@@ -16,6 +16,7 @@ class _FakeAiRepository implements AiRepository {
   Future<Recipe> generateRecipe(
     List<String> ingredients, {
     int servings = 2,
+    String? location,
   }) async => throw UnimplementedError();
 
   @override

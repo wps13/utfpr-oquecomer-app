@@ -43,7 +43,7 @@ class LocationPermissionDialog extends StatelessWidget {
         const SizedBox(height: AppSpacing.x2),
         const Text(
           'O Que Comer usa sua localização para sugerir receitas baseadas '
-          'no clima e ingredientes regionais.',
+          'nos ingredientes e sabores regionais.',
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: AppSpacing.x5),

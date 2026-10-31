@@ -32,8 +32,11 @@ class _ImmediateFavoritesRepository implements FavoritesRepository {
 
 class _ImmediateAiRepository implements AiRepository {
   @override
-  Future<Recipe> generateRecipe(List<String> ingredients, {int servings = 2}) =>
-      throw UnimplementedError();
+  Future<Recipe> generateRecipe(
+    List<String> ingredients, {
+    int servings = 2,
+    String? location,
+  }) => throw UnimplementedError();
 
   @override
   Future<List<String>> identifyFoods({

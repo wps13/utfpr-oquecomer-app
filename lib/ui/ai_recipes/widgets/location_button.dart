@@ -22,20 +22,26 @@ class LocationButton extends StatelessWidget {
       if (location case final currentLocation?)
         Row(
           children: [
-            const Icon(Icons.location_on_outlined, color: AppColors.primary),
-            const SizedBox(width: AppSpacing.x2),
+            const Icon(
+              Icons.location_on_outlined,
+              color: AppColors.primary,
+              size: 20,
+            ),
+            const SizedBox(width: AppSpacing.x1),
             Expanded(
               child: Text(
                 currentLocation,
-                style: Theme.of(context).textTheme.bodyLarge,
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
             ),
             IconButton(
               onPressed: onPressed,
               tooltip: 'Atualizar localização',
+              iconSize: 20,
+              visualDensity: VisualDensity.compact,
               icon: loading
                   ? const SizedBox.square(
-                      dimension: 16,
+                      dimension: 14,
                       child: CircularProgressIndicator(strokeWidth: 2),
                     )
                   : const Icon(Icons.refresh),
@@ -49,10 +55,10 @@ class LocationButton extends StatelessWidget {
             onPressed: onPressed,
             icon: loading
                 ? const SizedBox.square(
-                    dimension: 16,
+                    dimension: 14,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : const Icon(Icons.location_on_outlined, size: 18),
+                : const Icon(Icons.location_on_outlined, size: 16),
             label: const Text('Usar minha localização'),
           ),
         ),
