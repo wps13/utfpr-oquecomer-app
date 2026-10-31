@@ -22,6 +22,7 @@ class AiRecipesViewModel extends ChangeNotifier {
   bool _foodsDetected = false;
   List<String> _detectedIngredients = const [];
   int _servings = defaultServings;
+  String? _location;
   bool _disposed = false;
 
   Uint8List? get imageBytes => _imageBytes;
@@ -33,6 +34,7 @@ class AiRecipesViewModel extends ChangeNotifier {
   List<String> get detectedIngredients =>
       List.unmodifiable(_detectedIngredients);
   int get servings => _servings;
+  String? get location => _location;
   bool get canGenerateRecipe =>
       !_loading && (!_foodsDetected || _detectedIngredients.isNotEmpty);
 
@@ -56,6 +58,14 @@ class AiRecipesViewModel extends ChangeNotifier {
 
   void setError(String message) {
     _setError(message);
+  }
+
+  void setLocation(String? location) {
+    final normalized = location?.trim();
+    _location = normalized == null || normalized.isEmpty ? null : normalized;
+    _recipe = null;
+    _errorMessage = null;
+    _notify();
   }
 
   Future<void> generateRecipe() async {
@@ -93,6 +103,7 @@ class AiRecipesViewModel extends ChangeNotifier {
       _recipe = await _repository.generateRecipe(
         _detectedIngredients,
         servings: _servings,
+        location: _location,
       );
       _debugLog('generateRecipe: receita gerada com sucesso');
       _errorMessage = null;

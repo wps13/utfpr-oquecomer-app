@@ -139,6 +139,7 @@ void main() {
           final parts = content['parts'] as List<dynamic>;
           expect(parts, hasLength(1));
           expect(parts.single.toString(), contains('["ovos","tomate"]'));
+          expect(parts.single.toString(), contains('Curitiba, PR'));
           final config = body['generationConfig'] as Map<String, dynamic>;
           expect(config['temperature'], 0.2);
           expect(config['maxOutputTokens'], 2048);
@@ -170,7 +171,7 @@ void main() {
         ' ovos ',
         'OVOS',
         'tomate',
-      ]);
+      ], location: 'Curitiba, PR');
       expect(recipe.id, 'ai_test');
       expect(recipe.source, RecipeSource.ai);
       expect(requests, 1);

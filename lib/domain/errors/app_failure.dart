@@ -64,3 +64,39 @@ final class UnexpectedFailure extends AppFailure {
   final Object? cause;
   final StackTrace? stackTrace;
 }
+
+sealed class LocationFailure extends AppFailure {
+  const LocationFailure(super.message);
+}
+
+final class LocationTimeoutFailure extends LocationFailure {
+  const LocationTimeoutFailure([
+    super.message = 'Tempo para obter a localização esgotado',
+  ]);
+}
+
+final class LocationUnavailableFailure extends LocationFailure {
+  const LocationUnavailableFailure(this.cause, [this.stackTrace])
+    : super('Não foi possível obter a localização');
+
+  final Object cause;
+  final StackTrace? stackTrace;
+}
+
+final class LocationServiceDisabledFailure extends LocationFailure {
+  const LocationServiceDisabledFailure([
+    super.message = 'O serviço de localização está desativado',
+  ]);
+}
+
+final class LocationPermissionDeniedFailure extends LocationFailure {
+  const LocationPermissionDeniedFailure([
+    super.message = 'Permissão de localização negada',
+  ]);
+}
+
+final class GeocodingFailure extends LocationFailure {
+  const GeocodingFailure([
+    super.message = 'Não foi possível converter as coordenadas em endereço',
+  ]);
+}
