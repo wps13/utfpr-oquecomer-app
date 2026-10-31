@@ -1,5 +1,6 @@
 import '../../domain/errors/app_failure.dart';
 import '../../domain/models/recipe.dart';
+import '../../domain/models/recipe_category.dart';
 import '../model/catalog_recipe_dto.dart';
 import '../services/api/api_client.dart';
 import '../services/errors/error_reporter.dart';
@@ -13,6 +14,51 @@ class ApiCatalogRepository implements CatalogRepository {
 
   final CatalogApiClient client;
   final ErrorReporter errorReporter;
+
+  @override
+  Future<List<RecipeCategory>> getCategories() =>
+      _guard('getCategories', () async {
+        final categories = <String, RecipeCategory>{};
+        var page = 1;
+        while (true) {
+          final result = await _fetchPage(
+            '/receitas/todas',
+            page: page,
+            limit: 100,
+          );
+          for (final item in result.items) {
+            final type = item.type?.trim().toLowerCase();
+            if (type == null || type.isEmpty) {
+              throw const FormatException('Receita sem categoria.');
+            }
+            categories[type] = RecipeCategory(type);
+          }
+          if (!result.hasNextPage) return List.unmodifiable(categories.values);
+          page++;
+        }
+      });
+
+  @override
+  Future<List<Recipe>> getRecipesByCategory(String category) => _guard(
+    'getRecipesByCategory',
+    () async {
+      final type = category.trim().toLowerCase();
+      if (type.isEmpty) {
+        throw const InvalidInputFailure('Selecione uma categoria');
+      }
+      final data = await client.get<Object?>(
+        '/receitas/tipo/${Uri.encodeComponent(type)}',
+      );
+      if (data is! List) {
+        throw const FormatException('Lista de receitas da categoria inválida.');
+      }
+      final items = data.map(CatalogRecipeDto.fromJson).toList(growable: false);
+      if (items.any((item) => item.type?.trim().toLowerCase() != type)) {
+        throw const FormatException('Receita de outra categoria na resposta.');
+      }
+      return _recipes(items);
+    },
+  );
 
   @override
   Future<List<Recipe>> listRecipes({int page = 1, int limit = 20}) =>

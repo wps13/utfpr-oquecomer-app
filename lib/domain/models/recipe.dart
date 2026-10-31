@@ -40,11 +40,10 @@ class Recipe {
           ? [apiIngredients]
           : _texts(apiIngredients),
       steps: isApiPayload && apiSteps is String ? [apiSteps] : _texts(apiSteps),
-      preparationMinutes: _positiveInt(
-        isApiPayload
-            ? (json['preparationMinutes'] ?? 1)
-            : json['preparationMinutes'],
-      ),
+      preparationMinutes:
+          source == RecipeSource.catalog && json['preparationMinutes'] == null
+          ? null
+          : _positiveInt(json['preparationMinutes']),
       servings: _positiveInt(
         isApiPayload ? (json['servings'] ?? 1) : json['servings'],
       ),
@@ -64,7 +63,9 @@ class Recipe {
   final String description;
   final List<String> ingredients;
   final List<String> steps;
-  final int preparationMinutes;
+
+  /// Ausente quando o catálogo não informa o tempo. A IA deve fornecê-lo.
+  final int? preparationMinutes;
   final int servings;
   final RecipeSource source;
   final DateTime? favoritedAt;

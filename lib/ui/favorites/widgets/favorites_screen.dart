@@ -20,7 +20,9 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
   @override
   void initState() {
     super.initState();
-    unawaited(context.read<FavoritesViewModel>().load());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) unawaited(context.read<FavoritesViewModel>().load());
+    });
   }
 
   @override

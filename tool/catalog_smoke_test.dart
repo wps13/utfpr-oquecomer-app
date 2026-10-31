@@ -22,6 +22,19 @@ void main() {
     repository = ApiCatalogRepository(client: client, errorReporter: reporter);
   });
 
+  test('API real descobre categorias e consulta suas receitas', () async {
+    final categories = await repository.getCategories();
+    expect(categories, isNotEmpty);
+    for (final category in categories) {
+      final recipes = await repository.getRecipesByCategory(category.id);
+      expect(recipes.every((recipe) => recipe.type == category.id), isTrue);
+      expect(
+        recipes.every((recipe) => recipe.preparationMinutes == null),
+        isTrue,
+      );
+    }
+  }, timeout: const Timeout(Duration(minutes: 2)));
+
   test(
     'API real lista, detalha e busca uma receita pelo nome e ingrediente',
     () async {
