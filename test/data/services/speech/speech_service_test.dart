@@ -443,6 +443,41 @@ void main() {
       expect(await ttsEngine.initialize(), isFalse);
     });
 
+    test('on Android, rebinds the engine when initializing again', () async {
+      final ttsEngine = FlutterTtsEngine(platform: TargetPlatform.android);
+      results
+        ..['getEngines'] = <String>[]
+        ..['getDefaultEngine'] = 'com.google.android.tts';
+
+      // Sem motor na abertura do app: o TextToSpeech nativo falha.
+      expect(await ttsEngine.initialize(), isFalse);
+      expect(methodCalls.map((c) => c.method), ['getEngines']);
+
+      results['getEngines'] = ['com.example.tts', 'com.google.android.tts'];
+      methodCalls.clear();
+      expect(await ttsEngine.initialize(), isTrue);
+
+      expect(methodCalls.map((c) => c.method), [
+        'getEngines',
+        'getDefaultEngine',
+        'setEngine',
+      ]);
+      expect(methodCalls.last.arguments, 'com.google.android.tts');
+    });
+
+    test('on Android, rebinds the first engine without a default', () async {
+      final ttsEngine = FlutterTtsEngine(platform: TargetPlatform.android);
+      results
+        ..['getEngines'] = ['com.example.tts']
+        ..['getDefaultEngine'] = null;
+
+      await ttsEngine.initialize();
+      await ttsEngine.initialize();
+
+      expect(methodCalls.last.method, 'setEngine');
+      expect(methodCalls.last.arguments, 'com.example.tts');
+    });
+
     test('on iOS, shares the audio session', () async {
       final ttsEngine = FlutterTtsEngine(platform: TargetPlatform.iOS);
 

@@ -40,8 +40,11 @@ speech.status; // ValueListenable<SpeechStatus>: idle, speaking ou paused
 - `SpeechPlaybackFailure`: o motor recusou o texto.
 
 Falhas de inicialização não ficam em cache; a próxima leitura tenta preparar o
-motor novamente. Erros que o motor informa durante a leitura encerram a leitura
-e devolvem o estado para `idle`.
+motor novamente. No Android, essa nova tentativa recria a conexão com o motor
+(`setEngine`), pois a conexão que falhou não se recupera sozinha. Assim, se o
+usuário instalar ou reativar o motor de voz com o app aberto, a leitura volta a
+funcionar sem reiniciar o app. Erros que o motor informa durante a leitura
+encerram a leitura e devolvem o estado para `idle`.
 
 ## Modo mãos livres
 

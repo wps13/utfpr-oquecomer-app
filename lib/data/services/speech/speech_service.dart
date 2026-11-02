@@ -59,6 +59,7 @@ class FlutterTtsEngine implements TtsEngine {
   final TargetPlatform _platform;
   void Function(TtsEvent event)? _onEvent;
   FlutterTts? _plugin;
+  bool _initializedBefore = false;
 
   // O plugin só é criado quando a leitura é usada pela primeira vez.
   FlutterTts get _tts => _plugin ??= FlutterTts()
@@ -85,8 +86,22 @@ class FlutterTtsEngine implements TtsEngine {
         );
         return true;
       case TargetPlatform.android:
+        // Só há nova inicialização após uma falha. O TextToSpeech nativo que
+        // falhou (por exemplo, sem motor na abertura do app) não se reconecta
+        // sozinho; setEngine cria outro e aguarda a conexão.
+        final rebind = _initializedBefore;
+        _initializedBefore = true;
         final engines = await _tts.getEngines;
-        return engines is List && engines.isNotEmpty;
+        if (engines is! List || engines.isEmpty) return false;
+        if (rebind) {
+          final defaultEngine = await _tts.getDefaultEngine;
+          await _tts.setEngine(
+            engines.contains(defaultEngine)
+                ? '$defaultEngine'
+                : '${engines.first}',
+          );
+        }
+        return true;
       default:
         return false;
     }
