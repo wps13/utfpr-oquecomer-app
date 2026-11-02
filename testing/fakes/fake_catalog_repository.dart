@@ -1,4 +1,5 @@
 import 'package:o_que_comer_app/data/repositories/catalog_repository.dart';
+import 'package:o_que_comer_app/domain/errors/app_failure.dart';
 import 'package:o_que_comer_app/domain/models/recipe.dart';
 import 'package:o_que_comer_app/domain/models/recipe_category.dart';
 
@@ -8,6 +9,8 @@ class FakeCatalogRepository implements CatalogRepository {
   Future<List<RecipeCategory>> Function()? loadCategories;
   Future<List<Recipe>> Function(String)? loadRecipes;
   Future<List<Recipe>> Function()? loadAllRecipes;
+  Future<Recipe> Function(String)? loadRecipe;
+  final requestedRecipes = <String>[];
   int categoryCalls = 0;
   int listCalls = 0;
   int allRecipesCalls = 0;
@@ -40,7 +43,14 @@ class FakeCatalogRepository implements CatalogRepository {
   }
 
   @override
-  Future<Recipe> getRecipe(String id) => throw UnimplementedError();
+  Future<Recipe> getRecipe(String id) async {
+    requestedRecipes.add(id);
+    if (loadRecipe != null) return loadRecipe!(id);
+    return recipes.firstWhere(
+      (recipe) => recipe.id == id,
+      orElse: () => throw const ClientFailure(404, 'Receita não encontrada'),
+    );
+  }
 
   @override
   Future<List<Recipe>> searchByIngredient(String ingredient) =>
