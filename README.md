@@ -51,6 +51,16 @@ flutter analyze
 flutter test
 ```
 
+### Pipeline de qualidade
+
+O workflow **Pull Request Quality** roda em pull requests destinadas à branch
+`develop`. Ele instala as dependências e executa, nesta ordem, a verificação de
+formatação (`dart format`), a análise estática (`flutter analyze`) e os testes
+automatizados com cobertura (`flutter test --coverage`). Em pull requests, o
+pipeline verifica a cobertura com o `coverde` (mínimo de 80%) e publica ou
+atualiza um comentário com o percentual obtido. O pipeline falha se a
+formatação, a análise, qualquer teste ou o limite de cobertura falhar.
+
 ## Convenções de Git
 
 ### Commits
