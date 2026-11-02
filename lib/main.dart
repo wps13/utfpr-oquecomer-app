@@ -22,6 +22,7 @@ import 'data/services/errors/http_error_reporter.dart';
 import 'data/services/location/location_service.dart';
 import 'data/services/permissions/permission_handler_service.dart';
 import 'data/services/permissions/permission_service.dart';
+import 'data/services/speech/speech_service.dart';
 import 'ui/core/themes/theme.dart';
 import 'ui/favorites/view_models/favorites_viewmodel.dart';
 
@@ -65,6 +66,11 @@ Future<void> main() async {
         ),
         Provider<PermissionService>(create: (_) => PermissionHandlerService()),
         Provider<LocationService>(create: (_) => DeviceLocationService()),
+        Provider<DeviceSpeechService>(
+          create: (_) => DeviceSpeechService(),
+          dispose: (_, service) => unawaited(service.dispose()),
+        ),
+        Provider<SpeechService>(create: (c) => c.read<DeviceSpeechService>()),
         Provider<CatalogApiClient>(
           create: (c) =>
               CatalogApiClient(env, c.read<http_errors.ErrorReporter>()),

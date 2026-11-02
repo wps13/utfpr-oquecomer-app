@@ -5,13 +5,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:o_que_comer_app/data/repositories/ai_repository.dart';
 import 'package:o_que_comer_app/data/repositories/catalog_repository.dart';
 import 'package:o_que_comer_app/data/repositories/favorites_repository.dart';
+import 'package:o_que_comer_app/data/services/speech/speech_service.dart';
 import 'package:o_que_comer_app/domain/models/recipe.dart';
 import 'package:o_que_comer_app/routing/router.dart';
 import 'package:o_que_comer_app/routing/routes.dart';
 import 'package:o_que_comer_app/ui/favorites/view_models/favorites_viewmodel.dart';
+import 'package:o_que_comer_app/ui/hands_free_mode/view_models/hands_free_viewmodel.dart';
+import 'package:o_que_comer_app/ui/hands_free_mode/widgets/hands_free_mode_screen.dart';
 import 'package:provider/provider.dart';
 
 import '../../testing/fakes/fake_catalog_repository.dart';
+import '../../testing/fakes/fake_speech_service.dart';
 
 class _ImmediateFavoritesRepository implements FavoritesRepository {
   @override
@@ -47,9 +51,11 @@ class _ImmediateAiRepository implements AiRepository {
 
 void main() {
   late FavoritesViewModel favoritesViewModel;
+  late FakeSpeechService speechService;
 
   setUp(() {
     router.go(Routes.home);
+    speechService = FakeSpeechService();
     favoritesViewModel = FavoritesViewModel(
       repository: _ImmediateFavoritesRepository(),
     );
@@ -76,7 +82,10 @@ void main() {
                   source: RecipeSource.catalog,
                 ),
               ],
-            child: MaterialApp.router(routerConfig: router),
+            child: Provider<SpeechService>.value(
+              value: speechService,
+              child: MaterialApp.router(routerConfig: router),
+            ),
           ),
         ),
       ),
@@ -180,6 +189,27 @@ void main() {
 
     expect(find.text('Modo mãos livres'), findsNWidgets(2));
     expect(find.text('Detalhes da receita'), findsNothing);
+  });
+
+  testWidgets('leaving the hands-free screen stops the reading', (
+    tester,
+  ) async {
+    await pumpRouter(tester);
+    await goTo(tester, Routes.recipeDetails('42'));
+    await tester.tap(find.text('Modo mãos livres'));
+    await tester.pumpAndSettle();
+
+    await tester
+        .element(find.byType(HandsFreeModeScreen))
+        .read<HandsFreeViewModel>()
+        .readStep('Asse.');
+    expect(speechService.spoken, ['Asse.']);
+
+    await tester.tap(find.byType(BackButton));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(HandsFreeModeScreen), findsNothing);
+    expect(speechService.stopCalls, 1);
   });
 
   testWidgets('search result opens the selected recipe details', (

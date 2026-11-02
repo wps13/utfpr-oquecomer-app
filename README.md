@@ -16,6 +16,8 @@ Configuração e uso do serviço de permissões: [APP-23 / TT14](docs/permissoes
 
 Configuração e uso do serviço de localização: [localização](docs/localizacao.md).
 
+Uso e validação da [leitura em voz alta (APP-42)](docs/leitura-em-voz.md).
+
 Preparação do Xcode e execução no iOS: [guia de desenvolvimento](docs/desenvolvimento-ios.md).
 
 ## Executar localmente

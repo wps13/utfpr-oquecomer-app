@@ -100,3 +100,33 @@ final class GeocodingFailure extends LocationFailure {
     super.message = 'Não foi possível converter as coordenadas em endereço',
   ]);
 }
+
+sealed class SpeechFailure extends AppFailure {
+  const SpeechFailure(super.message);
+}
+
+/// Não há motor de voz no aparelho, o plugin não respondeu ou a
+/// inicialização excedeu o tempo limite.
+final class SpeechEngineUnavailableFailure extends SpeechFailure {
+  const SpeechEngineUnavailableFailure([this.cause, this.stackTrace])
+    : super('A leitura em voz alta não está disponível neste aparelho');
+
+  final Object? cause;
+  final StackTrace? stackTrace;
+}
+
+/// O motor existe, mas a voz do idioma configurado não está instalada.
+final class SpeechLanguageUnavailableFailure extends SpeechFailure {
+  const SpeechLanguageUnavailableFailure(this.language)
+    : super('A voz em português não está instalada neste aparelho');
+
+  final String language;
+}
+
+/// O motor recusou ou não conseguiu reproduzir o texto.
+final class SpeechPlaybackFailure extends SpeechFailure {
+  const SpeechPlaybackFailure([this.cause])
+    : super('Não foi possível ler o texto em voz alta');
+
+  final Object? cause;
+}
