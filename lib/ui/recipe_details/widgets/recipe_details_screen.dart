@@ -62,12 +62,25 @@ class _RecipeDetailsScreenState extends State<RecipeDetailsScreen> {
         child: vm.state == ViewState.error
             ? Padding(
                 padding: const EdgeInsets.all(AppSpacing.x4),
-                child: LoadFeedback(
-                  title: 'Não foi possível carregar a receita',
-                  message: vm.errorMessage,
-                  onRetry: () => unawaited(vm.load()),
-                  icon: Icons.wifi_off_outlined,
-                ),
+                child: vm.isNotFound
+                    ? LoadFeedback(
+                        title: 'Receita não encontrada',
+                        message: vm.errorMessage,
+                        icon: Icons.search_off,
+                        iconSize: 72,
+                        iconSpacing: AppSpacing.x6,
+                        actionLabel: 'Voltar',
+                        actionIcon: Icons.arrow_back,
+                        onRetry: () => _leave(context),
+                      )
+                    : LoadFeedback(
+                        title: 'Não foi possível carregar a receita',
+                        message: vm.errorMessage,
+                        onRetry: () => unawaited(vm.load()),
+                        icon: Icons.wifi_off_outlined,
+                        iconSize: 72,
+                        iconSpacing: AppSpacing.x6,
+                      ),
               )
             : const CircularProgressIndicator(
                 semanticsLabel: 'Carregando receita',
@@ -285,21 +298,21 @@ class _OverlayButton extends StatelessWidget {
   );
 }
 
+/// Volta para a tela anterior ou, aberta por link direto, para a home.
+void _leave(BuildContext context) {
+  if (context.canPop()) {
+    context.pop();
+  } else {
+    context.go(Routes.home);
+  }
+}
+
 class _BackToPrevious extends StatelessWidget {
   const _BackToPrevious();
 
   @override
-  Widget build(BuildContext context) => _OverlayButton(
-    child: BackButton(
-      onPressed: () {
-        if (context.canPop()) {
-          context.pop();
-        } else {
-          context.go(Routes.home);
-        }
-      },
-    ),
-  );
+  Widget build(BuildContext context) =>
+      _OverlayButton(child: BackButton(onPressed: () => _leave(context)));
 }
 
 class _FavoriteButton extends StatelessWidget {
@@ -319,15 +332,41 @@ class _FavoriteButton extends StatelessWidget {
         isSelected: isFavorite,
         onPressed: busy
             ? null
-            : () => unawaited(
-                isFavorite
-                    ? favorites.remove(recipe.id)
-                    : favorites.saveRecipe(recipe),
-              ),
+            : () => unawaited(_toggle(context, favorites, isFavorite)),
         color: Theme.of(context).colorScheme.primary,
         icon: const Icon(Icons.favorite_border),
         selectedIcon: const Icon(Icons.favorite),
       ),
     );
+  }
+
+  Future<void> _toggle(
+    BuildContext context,
+    FavoritesViewModel favorites,
+    bool wasFavorite,
+  ) async {
+    final messenger = ScaffoldMessenger.of(context);
+    if (wasFavorite) {
+      await favorites.remove(recipe.id);
+    } else {
+      await favorites.saveRecipe(recipe);
+    }
+    final failed = favorites.state == ViewState.error;
+    messenger
+      // Troca na hora: tocar várias vezes não enfileira avisos antigos.
+      ..removeCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 2),
+          content: Text(
+            failed
+                ? 'Não foi possível atualizar seus favoritos. Tente novamente.'
+                : wasFavorite
+                ? 'Receita removida dos favoritos'
+                : 'Receita adicionada aos favoritos',
+          ),
+        ),
+      );
   }
 }

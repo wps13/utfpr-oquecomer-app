@@ -35,6 +35,10 @@ class RecipeDetailsViewModel extends ChangeNotifier {
   Recipe? get recipe => _recipe;
   String? get errorMessage => _errorMessage;
 
+  /// A receita não existe (404 ou id inválido): tentar de novo não resolve.
+  bool get isNotFound => _isNotFound;
+  bool _isNotFound = false;
+
   /// Ingredientes um por item, mesmo quando a API envia um texto único.
   List<String> get ingredients => _ingredients;
 
@@ -50,6 +54,7 @@ class RecipeDetailsViewModel extends ChangeNotifier {
     if (_disposed) return;
     final request = ++_request;
     _errorMessage = null;
+    _isNotFound = false;
     if (_state != ViewState.loading) {
       _state = ViewState.loading;
       notifyListeners();
@@ -74,7 +79,12 @@ class RecipeDetailsViewModel extends ChangeNotifier {
       _recipe = null;
       _ingredients = const [];
       _steps = const [];
-      _errorMessage = catalogError is AppFailure
+      _isNotFound =
+          catalogError is InvalidInputFailure ||
+          (catalogError is ClientFailure && catalogError.isNotFound);
+      _errorMessage = _isNotFound
+          ? 'Ela pode ter sido removida do catálogo ou o link está incorreto.'
+          : catalogError is AppFailure
           ? catalogError.message
           : 'Tente novamente em instantes.';
       _state = ViewState.error;

@@ -87,6 +87,34 @@ void main() {
     expect(vm.errorMessage, 'Sem conexão com a internet');
   });
 
+  test('a 404 from the catalog is reported as not found', () async {
+    final vm = build('999');
+
+    await vm.load();
+
+    expect(vm.state, ViewState.error);
+    expect(vm.isNotFound, isTrue);
+    expect(vm.errorMessage, contains('removida do catálogo'));
+  });
+
+  test('an invalid id is reported as not found', () async {
+    catalog.loadRecipe = (_) async => throw const InvalidInputFailure();
+    final vm = build('abc');
+
+    await vm.load();
+
+    expect(vm.isNotFound, isTrue);
+  });
+
+  test('connection errors are not reported as not found', () async {
+    catalog.loadRecipe = (_) async => throw const NoConnectionFailure();
+    final vm = build('1');
+
+    await vm.load();
+
+    expect(vm.isNotFound, isFalse);
+  });
+
   test('uses a generic message for unexpected errors', () async {
     catalog.loadRecipe = (_) async => throw StateError('boom');
     favorites.error = Exception('sem favoritos');

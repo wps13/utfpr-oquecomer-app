@@ -564,12 +564,16 @@ void main() {
     );
   }
 
-  test('receita inexistente retornada como null não provoca crash', () async {
+  test('receita inexistente (200 sem corpo) vira não encontrada', () async {
     final repository = build((_) async => _response(null));
     await expectLater(
       repository.getRecipe('999999999'),
-      throwsA(isA<InvalidResponseFailure>()),
+      throwsA(
+        isA<ClientFailure>().having((f) => f.isNotFound, 'isNotFound', true),
+      ),
     );
+    // Receita inexistente é um caso normal: não vai para o Crashlytics.
+    expect(reporter.errors, isEmpty);
   });
 
   test('detalhe não aceita o ID de outra receita', () async {

@@ -176,9 +176,8 @@ void main() {
       router.routeInformationProvider.value.uri.path,
       Routes.recipeDetails('1'),
     );
-    // A receita padrão não existe no catálogo falso: mostra erro com retry.
-    expect(find.text('Não foi possível carregar a receita'), findsOneWidget);
-    expect(find.text('Tentar novamente'), findsOneWidget);
+    // A receita padrão não existe no catálogo falso.
+    expect(find.text('Receita não encontrada'), findsOneWidget);
   });
 
   testWidgets('opens the requested recipe and its hands-free child route', (

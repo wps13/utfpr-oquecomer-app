@@ -36,13 +36,17 @@ void main() {
   });
   tearDown(() => favorites.dispose());
 
-  Future<void> pump(WidgetTester tester, {Size size = const Size(390, 844)}) {
+  Future<void> pump(
+    WidgetTester tester, {
+    Size size = const Size(390, 844),
+    String id = '7',
+  }) {
     tester.view.physicalSize = size;
     tester.view.devicePixelRatio = 1;
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     final router = GoRouter(
-      initialLocation: Routes.recipeDetails(_lasanha.id),
+      initialLocation: Routes.recipeDetails(id),
       routes: [
         GoRoute(
           path: '/',
@@ -179,6 +183,48 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Modo de preparo'), findsOneWidget);
+  });
+
+  testWidgets('missing recipe shows not found and a way back', (tester) async {
+    await pump(tester, id: '999');
+    await tester.pumpAndSettle();
+
+    expect(find.text('Receita não encontrada'), findsOneWidget);
+    expect(find.text('Tentar novamente'), findsNothing);
+
+    await tester.tap(find.text('Voltar'));
+    await tester.pumpAndSettle();
+    expect(find.text('home'), findsOneWidget);
+  });
+
+  testWidgets('favoriting and unfavoriting show a toast', (tester) async {
+    await pump(tester);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byTooltip('Favoritar'));
+    await tester.pump();
+    await tester.pump();
+    expect(find.text('Receita adicionada aos favoritos'), findsOneWidget);
+    await tester.pumpAndSettle(const Duration(seconds: 3));
+
+    await tester.tap(find.byTooltip('Remover dos favoritos'));
+    await tester.pump(const Duration(milliseconds: 500));
+    expect(find.text('Receita removida dos favoritos'), findsOneWidget);
+  });
+
+  testWidgets('a favorites failure shows an error toast', (tester) async {
+    await pump(tester);
+    await tester.pumpAndSettle();
+    favoritesRepository.error = Exception('disco cheio');
+
+    await tester.tap(find.byTooltip('Favoritar'));
+    await tester.pump();
+    await tester.pump();
+
+    expect(
+      find.text('Não foi possível atualizar seus favoritos. Tente novamente.'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('back from a direct link goes home', (tester) async {
