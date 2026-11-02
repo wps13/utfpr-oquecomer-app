@@ -136,7 +136,16 @@ class ApiCatalogRepository implements CatalogRepository {
     if (!RegExp(r'^[1-9][0-9]*$').hasMatch(id)) {
       throw const InvalidInputFailure('Identificador de receita inválido');
     }
-    final data = await client.get<Object?>('/receitas/$id');
+    final Object? data;
+    try {
+      data = await client.get<Object?>('/receitas/$id');
+    } on InvalidResponseFailure catch (failure) {
+      // A API responde 200 sem corpo quando o id não existe.
+      if (failure.isEmptyBody) {
+        throw const ClientFailure(404, 'Receita não encontrada');
+      }
+      rethrow;
+    }
     final result = CatalogRecipeDto.fromJson(data);
     if (result.id.toString() != id) {
       throw const FormatException('Identificador de resposta incompatível.');

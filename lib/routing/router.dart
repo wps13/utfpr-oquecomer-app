@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import 'routes.dart';
 import '../data/repositories/ai_repository.dart';
+import '../data/repositories/favorites_repository.dart';
 import '../data/repositories/catalog_repository.dart';
 import '../domain/models/recipe_category.dart';
 import '../ui/ai_recipes/widgets/ai_recipes_screen.dart';
@@ -16,6 +17,7 @@ import '../ui/hands_free_mode/widgets/hands_free_mode_screen.dart';
 import '../ui/home/widgets/home_screen.dart';
 import '../ui/home/view_models/home_viewmodel.dart';
 import '../ui/inventory/widgets/inventory_screen.dart';
+import '../ui/recipe_details/view_models/recipe_details_viewmodel.dart';
 import '../ui/recipe_details/widgets/recipe_details_screen.dart';
 import '../ui/search/widgets/search_screen.dart';
 import '../ui/search/view_models/search_viewmodel.dart';
@@ -104,7 +106,16 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: ':id',
           builder: (context, state) {
-            return const RecipeDetailsScreen();
+            final id = state.pathParameters['id']!;
+            return ChangeNotifierProvider(
+              key: ValueKey(id),
+              create: (context) => RecipeDetailsViewModel(
+                recipeId: id,
+                catalogRepository: context.read<CatalogRepository>(),
+                favoritesRepository: context.read<FavoritesRepository>(),
+              ),
+              child: const RecipeDetailsScreen(),
+            );
           },
           routes: [
             GoRoute(

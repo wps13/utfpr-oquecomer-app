@@ -76,9 +76,7 @@ class ApiClient {
     try {
       final data = (await send()).data;
       if (data == null) {
-        throw const InvalidResponseFailure(
-          'O servidor retornou uma resposta vazia',
-        );
+        throw const InvalidResponseFailure.emptyBody();
       }
       return data;
     } on AppFailure catch (f) {

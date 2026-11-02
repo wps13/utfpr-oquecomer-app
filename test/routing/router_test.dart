@@ -65,18 +65,25 @@ void main() {
         value: favoritesViewModel,
         child: Provider<AiRepository>.value(
           value: _ImmediateAiRepository(),
-          child: Provider<CatalogRepository>(
-            create: (_) => FakeCatalogRepository()
-              ..recipes = [
-                Recipe(
-                  id: '42',
-                  title: 'Bolo de cenoura',
-                  ingredients: ['Cenoura'],
-                  steps: ['Asse.'],
-                  source: RecipeSource.catalog,
-                ),
-              ],
-            child: MaterialApp.router(routerConfig: router),
+          child: MultiProvider(
+            providers: [
+              Provider<FavoritesRepository>.value(
+                value: _ImmediateFavoritesRepository(),
+              ),
+            ],
+            child: Provider<CatalogRepository>(
+              create: (_) => FakeCatalogRepository()
+                ..recipes = [
+                  Recipe(
+                    id: '42',
+                    title: 'Bolo de cenoura',
+                    ingredients: ['Cenoura'],
+                    steps: ['Asse.'],
+                    source: RecipeSource.catalog,
+                  ),
+                ],
+              child: MaterialApp.router(routerConfig: router),
+            ),
           ),
         ),
       ),
@@ -165,8 +172,12 @@ void main() {
     await pumpRouter(tester);
     await goTo(tester, Routes.recipes);
 
-    expect(find.text('Detalhes da receita'), findsOneWidget);
-    expect(find.text('Modo mãos livres'), findsOneWidget);
+    expect(
+      router.routeInformationProvider.value.uri.path,
+      Routes.recipeDetails('1'),
+    );
+    // A receita padrão não existe no catálogo falso.
+    expect(find.text('Receita não encontrada'), findsOneWidget);
   });
 
   testWidgets('opens the requested recipe and its hands-free child route', (
@@ -175,11 +186,11 @@ void main() {
     await pumpRouter(tester);
     await goTo(tester, Routes.recipeDetails('42'));
 
-    await tester.tap(find.text('Modo mãos livres'));
+    await tester.tap(find.text('Iniciar'));
     await tester.pumpAndSettle();
 
     expect(find.text('Modo mãos livres'), findsNWidgets(2));
-    expect(find.text('Detalhes da receita'), findsNothing);
+    expect(find.text('Modo de preparo'), findsNothing);
   });
 
   testWidgets('search result opens the selected recipe details', (
@@ -193,6 +204,6 @@ void main() {
     await tester.tap(find.text('Bolo de cenoura'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Detalhes da receita'), findsOneWidget);
+    expect(find.text('Modo de preparo'), findsOneWidget);
   });
 }

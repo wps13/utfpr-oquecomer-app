@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../domain/models/recipe.dart';
 import '../themes/radius.dart';
 import '../themes/spacing.dart';
+import 'recipe_image.dart';
 
 class RecipeCard extends StatelessWidget {
   const RecipeCard({required this.recipe, required this.onTap, super.key});
@@ -26,7 +27,7 @@ class RecipeCard extends StatelessWidget {
           children: [
             AspectRatio(
               aspectRatio: 16 / 9,
-              child: _RecipeImage(url: recipe.imageUrl),
+              child: RecipeImage(url: recipe.imageUrl),
             ),
             Padding(
               padding: const EdgeInsets.all(AppSpacing.x4),
@@ -74,43 +75,6 @@ class RecipeCard extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _RecipeImage extends StatelessWidget {
-  const _RecipeImage({this.url});
-
-  final String? url;
-
-  @override
-  Widget build(BuildContext context) {
-    final uri = url == null ? null : Uri.tryParse(url!);
-    final placeholder = Semantics(
-      label: 'Imagem indisponível',
-      child: ColoredBox(
-        color: Theme.of(context).colorScheme.primaryFixed,
-        child: Center(
-          child: Icon(
-            Icons.restaurant,
-            size: 44,
-            color: Theme.of(context).colorScheme.primary,
-          ),
-        ),
-      ),
-    );
-    if (uri == null ||
-        !const {'http', 'https'}.contains(uri.scheme) ||
-        uri.host.isEmpty) {
-      return placeholder;
-    }
-    return Image.network(
-      url!,
-      fit: BoxFit.cover,
-      excludeFromSemantics: true,
-      loadingBuilder: (_, child, progress) =>
-          progress == null ? child : placeholder,
-      errorBuilder: (_, error, stack) => placeholder,
     );
   }
 }
