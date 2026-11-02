@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:o_que_comer_app/data/repositories/catalog_repository.dart';
+import 'package:o_que_comer_app/data/repositories/favorites_repository.dart';
 import 'package:o_que_comer_app/domain/errors/app_failure.dart';
 import 'package:o_que_comer_app/domain/models/recipe.dart';
 import 'package:o_que_comer_app/domain/models/recipe_category.dart';
@@ -28,6 +29,7 @@ Recipe sampleRecipe({String id = '1', String type = 'doce', int? minutes}) =>
 
 void main() {
   late FakeCatalogRepository repository;
+  late FakeFavoritesRepository favoritesRepository;
   late FavoritesViewModel favorites;
 
   setUp(() {
@@ -42,7 +44,8 @@ void main() {
         sampleRecipe(),
         sampleRecipe(id: '2', type: 'salgado', minutes: 25),
       ];
-    favorites = FavoritesViewModel(repository: FakeFavoritesRepository());
+    favoritesRepository = FakeFavoritesRepository();
+    favorites = FavoritesViewModel(repository: favoritesRepository);
   });
   tearDown(() => favorites.dispose());
 
@@ -55,6 +58,7 @@ void main() {
       MultiProvider(
         providers: [
           Provider<CatalogRepository>.value(value: repository),
+          Provider<FavoritesRepository>.value(value: favoritesRepository),
           ChangeNotifierProvider<FavoritesViewModel>.value(value: favorites),
         ],
         child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
@@ -148,7 +152,7 @@ void main() {
       expect(find.text('25 min'), findsOneWidget);
       await tester.tap(find.text('Frango grelhado'));
       await tester.pumpAndSettle();
-      expect(find.text('Detalhes da receita'), findsOneWidget);
+      expect(find.text('Modo de preparo'), findsOneWidget);
       await tester.tap(find.byType(BackButton));
       await tester.pumpAndSettle();
       expect(find.text('Frango grelhado'), findsOneWidget);

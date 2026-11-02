@@ -53,7 +53,14 @@ final class InvalidInputFailure extends AppFailure {
 final class InvalidResponseFailure extends AppFailure {
   const InvalidResponseFailure([
     super.message = 'O servidor retornou uma resposta inválida',
-  ]);
+  ]) : isEmptyBody = false;
+
+  /// Resposta sem corpo. Em consultas por id, a API usa isso para "não existe".
+  const InvalidResponseFailure.emptyBody([
+    super.message = 'O servidor retornou uma resposta vazia',
+  ]) : isEmptyBody = true;
+
+  final bool isEmptyBody;
 }
 
 /// Qualquer falha não prevista. É reportada ao `ErrorReporter`.

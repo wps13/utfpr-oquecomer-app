@@ -3,15 +3,18 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:o_que_comer_app/data/repositories/catalog_repository.dart';
+import 'package:o_que_comer_app/data/repositories/favorites_repository.dart';
 import 'package:o_que_comer_app/domain/errors/app_failure.dart';
 import 'package:o_que_comer_app/domain/models/recipe.dart';
 import 'package:o_que_comer_app/routing/router.dart';
 import 'package:o_que_comer_app/routing/routes.dart';
 import 'package:o_que_comer_app/ui/core/themes/theme.dart';
 import 'package:o_que_comer_app/ui/core/ui/recipe_list.dart';
+import 'package:o_que_comer_app/ui/favorites/view_models/favorites_viewmodel.dart';
 import 'package:provider/provider.dart';
 
 import '../../../../testing/fakes/fake_catalog_repository.dart';
+import '../../../../testing/fakes/fake_favorites_repository.dart';
 
 Recipe _recipe(String id, String title) => Recipe(
   id: id,
@@ -24,8 +27,12 @@ Recipe _recipe(String id, String title) => Recipe(
 
 void main() {
   late FakeCatalogRepository repository;
+  late FakeFavoritesRepository favoritesRepository;
+  late FavoritesViewModel favorites;
 
   setUp(() {
+    favoritesRepository = FakeFavoritesRepository();
+    favorites = FavoritesViewModel(repository: favoritesRepository);
     router.go(Routes.search);
     repository = FakeCatalogRepository()
       ..recipes = [
@@ -34,6 +41,7 @@ void main() {
         _recipe('3', 'Pão de queijo'),
       ];
   });
+  tearDown(() => favorites.dispose());
 
   Future<void> pumpApp(WidgetTester tester, {bool settle = true}) async {
     tester.view.physicalSize = const Size(390, 844);
@@ -41,8 +49,12 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
     await tester.pumpWidget(
-      Provider<CatalogRepository>.value(
-        value: repository,
+      MultiProvider(
+        providers: [
+          Provider<CatalogRepository>.value(value: repository),
+          Provider<FavoritesRepository>.value(value: favoritesRepository),
+          ChangeNotifierProvider<FavoritesViewModel>.value(value: favorites),
+        ],
         child: MaterialApp.router(theme: AppTheme.light, routerConfig: router),
       ),
     );
@@ -165,7 +177,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Torta de Limão'));
     await tester.pumpAndSettle();
-    expect(find.text('Detalhes da receita'), findsOneWidget);
+    expect(find.text('Modo de preparo'), findsOneWidget);
     await tester.tap(find.byType(BackButton));
     await tester.pumpAndSettle();
     expect(find.text('Torta de Limão'), findsOneWidget);

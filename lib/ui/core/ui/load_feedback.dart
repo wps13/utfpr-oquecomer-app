@@ -8,6 +8,10 @@ class LoadFeedback extends StatelessWidget {
     required this.onRetry,
     this.message,
     this.icon = Icons.restaurant_menu,
+    this.actionLabel = 'Tentar novamente',
+    this.actionIcon = Icons.refresh,
+    this.iconSize = 36,
+    this.iconSpacing = AppSpacing.x3,
     super.key,
   });
 
@@ -15,6 +19,12 @@ class LoadFeedback extends StatelessWidget {
   final String? message;
   final VoidCallback onRetry;
   final IconData icon;
+  final String actionLabel;
+  final IconData actionIcon;
+  final double iconSize;
+
+  /// Espaço entre o ícone e o título.
+  final double iconSpacing;
 
   @override
   Widget build(BuildContext context) => Padding(
@@ -22,8 +32,12 @@ class LoadFeedback extends StatelessWidget {
     child: Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(icon, size: 36, color: Theme.of(context).colorScheme.primary),
-        const SizedBox(height: AppSpacing.x3),
+        Icon(
+          icon,
+          size: iconSize,
+          color: Theme.of(context).colorScheme.primary,
+        ),
+        SizedBox(height: iconSpacing),
         Text(
           title,
           textAlign: TextAlign.center,
@@ -36,8 +50,8 @@ class LoadFeedback extends StatelessWidget {
         const SizedBox(height: AppSpacing.x4),
         FilledButton.icon(
           onPressed: onRetry,
-          icon: const Icon(Icons.refresh),
-          label: const Text('Tentar novamente'),
+          icon: Icon(actionIcon),
+          label: Text(actionLabel),
         ),
       ],
     ),
