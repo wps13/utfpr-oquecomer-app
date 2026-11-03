@@ -105,6 +105,7 @@ void main() {
     AppPermission.camera: 'câmera para tirar fotos',
     AppPermission.locationWhenInUse: 'opções de comida',
     AppPermission.microphone: 'microfone para captar sua voz',
+    AppPermission.speechRecognition: 'comandos no modo mãos livres',
     AppPermission.photos: 'suas fotos para que você escolha',
   };
   for (final entry in rationales.entries) {

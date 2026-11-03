@@ -14,6 +14,8 @@ import '../ui/catalog/widgets/catalog_screen.dart';
 import '../ui/catalog/view_models/catalog_viewmodel.dart';
 import '../ui/favorites/widgets/favorites_screen.dart';
 import '../ui/hands_free_mode/widgets/hands_free_mode_screen.dart';
+import '../ui/hands_free_mode/view_models/voice_commands_viewmodel.dart';
+import '../data/services/voice/voice_capture_service.dart';
 import '../ui/home/widgets/home_screen.dart';
 import '../ui/home/view_models/home_viewmodel.dart';
 import '../ui/inventory/widgets/inventory_screen.dart';
@@ -121,7 +123,12 @@ final GoRouter router = GoRouter(
             GoRoute(
               path: 'hands-free',
               builder: (context, state) {
-                return const HandsFreeModeScreen();
+                return ChangeNotifierProvider(
+                  create: (context) => VoiceCommandsViewModel(
+                    capture: context.read<VoiceCaptureService>(),
+                  ),
+                  child: const HandsFreeModeScreen(),
+                );
               },
             ),
           ],

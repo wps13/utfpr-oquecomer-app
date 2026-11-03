@@ -124,6 +124,7 @@ extension on AppPermission {
     AppPermission.camera => 'Acesso à câmera',
     AppPermission.locationWhenInUse => 'Acesso à localização',
     AppPermission.microphone => 'Acesso ao microfone',
+    AppPermission.speechRecognition => 'Reconhecimento de fala',
     AppPermission.photos => 'Acesso às fotos',
     AppPermission.appStorage => 'Armazenamento do aplicativo',
   };
@@ -138,6 +139,9 @@ extension on AppPermission {
     AppPermission.microphone =>
       'O Que Comer App precisa acessar o microfone para captar sua voz '
           'quando você usar os recursos de áudio.',
+    AppPermission.speechRecognition =>
+      'O Que Comer App usa o reconhecimento de fala para entender seus '
+          'comandos no modo mãos livres.',
     AppPermission.photos =>
       'O Que Comer App precisa acessar suas fotos para que você escolha '
           'imagens para usar no aplicativo.',
