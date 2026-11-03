@@ -29,6 +29,8 @@ class PermissionHandlerService implements PermissionService {
       AppPermission.camera => native.Permission.camera,
       AppPermission.locationWhenInUse => native.Permission.locationWhenInUse,
       AppPermission.microphone => native.Permission.microphone,
+      AppPermission.speechRecognition =>
+        _platform == TargetPlatform.iOS ? native.Permission.speech : null,
       AppPermission.photos =>
         _platform == TargetPlatform.android && await _androidSdkVersion() < 33
             ? native.Permission.storage
