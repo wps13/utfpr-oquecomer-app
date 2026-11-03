@@ -18,3 +18,9 @@ O acesso é feito exclusivamente por `HiveFavoritesRepository`. Falhas de
 leitura, escrita, exclusão ou verificação são reportadas ao Crashlytics por
 meio de `ErrorReporter` e depois propagadas para a ViewModel, que apresenta o
 estado de erro à interface.
+
+Receitas geradas por IA podem ser favoritedas diretamente no card de resultado.
+Ao abrir um item da lista, a tela de detalhes tenta primeiro o catálogo e usa a
+cópia local completa como fallback, permitindo consultar título, ingredientes e
+passos sem internet. A chave do registro é o ID da receita, portanto salvar
+novamente a mesma receita atualiza o registro existente em vez de duplicá-lo.
