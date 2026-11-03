@@ -25,6 +25,7 @@ import 'data/services/permissions/permission_service.dart';
 import 'data/services/voice/device_voice_capture_service.dart';
 import 'data/services/voice/speech_to_text_engine.dart';
 import 'data/services/voice/voice_capture_service.dart';
+import 'data/services/speech/speech_service.dart';
 import 'ui/core/themes/theme.dart';
 import 'ui/favorites/view_models/favorites_viewmodel.dart';
 
@@ -76,6 +77,11 @@ Future<void> main() async {
           dispose: (_, service) => unawaited(service.dispose()),
         ),
         Provider<LocationService>(create: (_) => DeviceLocationService()),
+        Provider<DeviceSpeechService>(
+          create: (_) => DeviceSpeechService(),
+          dispose: (_, service) => unawaited(service.dispose()),
+        ),
+        Provider<SpeechService>(create: (c) => c.read<DeviceSpeechService>()),
         Provider<CatalogApiClient>(
           create: (c) =>
               CatalogApiClient(env, c.read<http_errors.ErrorReporter>()),
