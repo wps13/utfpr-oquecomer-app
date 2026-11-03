@@ -9,9 +9,7 @@ abstract interface class ScreenWakeLockService {
 typedef WakelockToggle = Future<void> Function({required bool enable});
 
 class WakelockPlusScreenWakeLockService implements ScreenWakeLockService {
-  WakelockPlusScreenWakeLockService({
-    this.toggle = WakelockPlus.toggle,
-  });
+  WakelockPlusScreenWakeLockService({this.toggle = WakelockPlus.toggle});
 
   final WakelockToggle toggle;
 
