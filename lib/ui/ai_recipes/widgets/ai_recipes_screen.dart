@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -8,9 +10,12 @@ import '../../../data/services/location/location_service.dart';
 import '../../../data/services/permissions/permission_service.dart';
 import '../../../domain/errors/app_failure.dart';
 import '../../../domain/models/app_permission.dart';
+import '../../../domain/models/recipe.dart';
 import '../../../routing/routes.dart';
+import '../../core/view_state.dart';
 import '../../core/view_models/permission_viewmodel.dart';
 import '../../core/themes/spacing.dart';
+import '../../favorites/view_models/favorites_viewmodel.dart';
 import '../view_models/ai_recipes_viewmodel.dart';
 import 'detected_ingredients.dart';
 import 'ai_recipes_header.dart';
@@ -42,6 +47,13 @@ class _AiRecipesScreenState extends State<AiRecipesScreen> {
       text: '${AiRecipesViewModel.defaultServings}',
     );
     _servingsController.addListener(_onServingsChanged);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      final favorites = context.read<FavoritesViewModel?>();
+      if (favorites?.state == ViewState.loading) {
+        unawaited(favorites!.load());
+      }
+    });
   }
 
   void _onServingsChanged() {
@@ -127,6 +139,7 @@ class _AiRecipesScreenState extends State<AiRecipesScreen> {
   @override
   Widget build(BuildContext context) {
     final viewModel = context.watch<AiRecipesViewModel>();
+    final favorites = context.watch<FavoritesViewModel?>();
     final permissionService = context.read<PermissionService?>();
     final permissionViewModel = permissionService == null
         ? null
@@ -202,12 +215,47 @@ class _AiRecipesScreenState extends State<AiRecipesScreen> {
             ],
             if (viewModel.recipe case final recipe?) ...[
               const SizedBox(height: AppSpacing.x5),
-              RecipeResultCard(recipe: recipe),
+              RecipeResultCard(
+                recipe: recipe,
+                showFavorite: favorites != null,
+                isFavorite:
+                    favorites?.favorites.any((f) => f.id == recipe.id) ?? false,
+                onFavorite:
+                    favorites == null || favorites.state == ViewState.loading
+                    ? null
+                    : () => _toggleFavorite(recipe),
+              ),
             ],
           ],
         ),
       ),
     );
+  }
+
+  Future<void> _toggleFavorite(Recipe recipe) async {
+    final favorites = context.read<FavoritesViewModel?>();
+    if (favorites == null) return;
+    final isFavorite = favorites.favorites.any((f) => f.id == recipe.id);
+    if (isFavorite) {
+      await favorites.remove(recipe.id);
+    } else {
+      await favorites.saveRecipe(recipe);
+    }
+    if (!mounted) return;
+    final failed = favorites.state == ViewState.error;
+    ScaffoldMessenger.of(context)
+      ..removeCurrentSnackBar()
+      ..showSnackBar(
+        SnackBar(
+          content: Text(
+            failed
+                ? 'Não foi possível atualizar seus favoritos. Tente novamente.'
+                : isFavorite
+                ? 'Receita removida dos favoritos'
+                : 'Receita adicionada aos favoritos',
+          ),
+        ),
+      );
   }
 
   Future<void> _requestLocation(
