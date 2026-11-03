@@ -22,6 +22,7 @@ import 'data/services/errors/http_error_reporter.dart';
 import 'data/services/location/location_service.dart';
 import 'data/services/permissions/permission_handler_service.dart';
 import 'data/services/permissions/permission_service.dart';
+import 'data/services/screen_wake_lock/screen_wake_lock_service.dart';
 import 'data/services/voice/device_voice_capture_service.dart';
 import 'data/services/voice/speech_to_text_engine.dart';
 import 'data/services/voice/voice_capture_service.dart';
@@ -67,6 +68,9 @@ Future<void> main() async {
               HttpErrorReporter(errorReporter: c.read<ErrorReporter>()),
         ),
         Provider<PermissionService>(create: (_) => PermissionHandlerService()),
+        Provider<ScreenWakeLockService>(
+          create: (_) => WakelockPlusScreenWakeLockService(),
+        ),
         Provider<VoiceCaptureService>(
           create: (c) => DeviceVoiceCaptureService(
             engine: SpeechToTextEngine(),
