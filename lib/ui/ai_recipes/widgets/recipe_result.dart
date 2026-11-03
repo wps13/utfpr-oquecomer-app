@@ -37,9 +37,18 @@ class RecipeErrorCard extends StatelessWidget {
 }
 
 class RecipeResultCard extends StatelessWidget {
-  const RecipeResultCard({required this.recipe, super.key});
+  const RecipeResultCard({
+    required this.recipe,
+    this.showFavorite = false,
+    this.isFavorite = false,
+    this.onFavorite,
+    super.key,
+  });
 
   final Recipe recipe;
+  final bool showFavorite;
+  final bool isFavorite;
+  final VoidCallback? onFavorite;
 
   @override
   Widget build(BuildContext context) => Card(
@@ -55,6 +64,17 @@ class RecipeResultCard extends StatelessWidget {
               fontWeight: FontWeight.w700,
             ),
           ),
+          if (showFavorite) ...[
+            const SizedBox(height: AppSpacing.x2),
+            Align(
+              alignment: Alignment.centerRight,
+              child: OutlinedButton.icon(
+                onPressed: onFavorite,
+                icon: Icon(isFavorite ? Icons.favorite : Icons.favorite_border),
+                label: Text(isFavorite ? 'Favoritada' : 'Favoritar receita'),
+              ),
+            ),
+          ],
           if (recipe.description.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.x2),
             Text(recipe.description),

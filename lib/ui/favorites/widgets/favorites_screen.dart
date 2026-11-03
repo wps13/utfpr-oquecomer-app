@@ -1,8 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
+import '../../../routing/routes.dart';
 import '../../core/view_state.dart';
 import '../view_models/favorites_viewmodel.dart';
 
@@ -107,6 +109,7 @@ class _Body extends StatelessWidget {
             for (final f in vm.favorites)
               ListTile(
                 title: Text(f.name),
+                onTap: () => context.push(Routes.recipeDetails(f.id)),
                 trailing: IconButton(
                   icon: const Icon(Icons.delete_outline),
                   onPressed: () =>
