@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import '../../../data/services/voice/voice_capture_service.dart';
+import '../../../data/services/screen_wake_lock/screen_wake_lock_service.dart';
 import '../../../domain/models/voice_command.dart';
 import '../../../domain/models/voice_failure.dart';
 import '../../../domain/voice/voice_command_interpreter.dart';
@@ -12,6 +13,7 @@ class VoiceCommandsViewModel extends ChangeNotifier
     with WidgetsBindingObserver {
   VoiceCommandsViewModel({
     required VoiceCaptureService capture,
+    required this.wakeLock,
     VoiceCommandInterpreter? interpreter,
   }) : _capture = capture,
        _interpreter = interpreter ?? VoiceCommandInterpreter() {
@@ -32,6 +34,7 @@ class VoiceCommandsViewModel extends ChangeNotifier
   }
 
   final VoiceCaptureService _capture;
+  final ScreenWakeLockService wakeLock;
   final VoiceCommandInterpreter _interpreter;
   final _commands = StreamController<VoiceCommand>.broadcast();
   late final StreamSubscription<String> _texts;
@@ -51,12 +54,13 @@ class VoiceCommandsViewModel extends ChangeNotifier
     _enabled = true;
     _failure = null;
     notifyListeners();
+    await wakeLock.enable();
     await _capture.start();
   }
 
-  Future<void> stop() {
+  Future<void> stop() async {
     _enabled = false;
-    return _capture.stop();
+    await Future.wait([_capture.stop(), wakeLock.disable()]);
   }
 
   Future<T> duringPlayback<T>(Future<T> Function() playback) =>
@@ -92,6 +96,7 @@ class VoiceCommandsViewModel extends ChangeNotifier
     unawaited(_states.cancel());
     unawaited(_commands.close());
     unawaited(_capture.stop());
+    unawaited(wakeLock.disable());
     super.dispose();
   }
 }
