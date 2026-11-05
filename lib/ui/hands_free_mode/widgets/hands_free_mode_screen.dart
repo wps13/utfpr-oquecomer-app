@@ -1,9 +1,7 @@
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../routing/routes.dart';
-import 'debug_speech_panel.dart';
 
 class HandsFreeModeScreen extends StatelessWidget {
   const new({super.key});
@@ -23,16 +21,7 @@ class HandsFreeModeScreen extends StatelessWidget {
           },
         ),
       ),
-      body: const Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text('Modo mãos livres'),
-            // TEMPORÁRIO (APP-42): remover após validar a leitura no iOS.
-            if (kDebugMode) DebugSpeechPanel(),
-          ],
-        ),
-      ),
+      body: const Center(child: Text('Modo mãos livres')),
     );
   }
 }
