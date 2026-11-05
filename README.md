@@ -12,6 +12,8 @@ Fluxo da página inicial e [seleção de receitas por categoria (APP-25)](docs/c
 
 Uso e validação da [busca de receitas por nome (APP-26)](docs/busca-catalogo.md).
 
+Tela e validação do [modo mãos livres com comandos de voz (APP-48)](docs/modo-maos-livres.md).
+
 Captura, interpretação e testes de [comandos de voz do modo mãos livres (APP-43)](docs/comandos-voz.md).
 
 Configuração e uso do serviço de permissões: [APP-23 / TT14](docs/permissoes.md).

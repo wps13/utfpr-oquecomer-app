@@ -88,10 +88,12 @@ biblioteca quando esse for o fluxo escolhido.
 O Android usa `compileSdk = 37`, exigido por `permission_handler_android` 14.1.0.
 O `minSdk` e o `targetSdk` seguem os valores do Flutter do projeto.
 
-O projeto iOS usa Swift Package Manager. `permission_handler_apple` 9.6.2 habilita
+O plugin de permissões iOS usa Swift Package Manager.
+`permission_handler_apple` 9.6.2 habilita
 as estratégias pela presença das chaves no `Info.plist`; a localização usa
 somente a autorização durante o uso. A APP-43 acrescenta a estratégia de fala.
-Não é necessário criar um `Podfile`. Para builds
+As estratégias desse plugin não dependem de macros no Podfile; o Podfile
+versionado na APP-48 atende ao leitor `flutter_tts`. Para builds
 iniciados pela interface do Xcode, o plugin exige indicar o arquivo explicitamente
 antes de abrir o Xcode:
 
