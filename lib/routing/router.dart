@@ -6,6 +6,7 @@ import 'routes.dart';
 import '../data/repositories/ai_repository.dart';
 import '../data/repositories/favorites_repository.dart';
 import '../data/repositories/catalog_repository.dart';
+import '../data/services/speech/speech_service.dart';
 import '../domain/models/recipe_category.dart';
 import '../ui/ai_recipes/widgets/ai_recipes_screen.dart';
 import '../ui/ai_recipes/view_models/ai_recipes_viewmodel.dart';
@@ -13,6 +14,7 @@ import '../ui/ai_recipes/view_models/ai_recipes_viewmodel.dart';
 import '../ui/catalog/widgets/catalog_screen.dart';
 import '../ui/catalog/view_models/catalog_viewmodel.dart';
 import '../ui/favorites/widgets/favorites_screen.dart';
+import '../ui/hands_free_mode/view_models/hands_free_viewmodel.dart';
 import '../ui/hands_free_mode/widgets/hands_free_mode_screen.dart';
 import '../ui/hands_free_mode/view_models/voice_commands_viewmodel.dart';
 import '../data/services/voice/voice_capture_service.dart';
@@ -124,11 +126,20 @@ final GoRouter router = GoRouter(
             GoRoute(
               path: 'hands-free',
               builder: (context, state) {
-                return ChangeNotifierProvider(
-                  create: (context) => VoiceCommandsViewModel(
-                    capture: context.read<VoiceCaptureService>(),
-                    wakeLock: context.read<ScreenWakeLockService>(),
-                  ),
+                return MultiProvider(
+                  providers: [
+                    ChangeNotifierProvider(
+                      create: (context) => VoiceCommandsViewModel(
+                        capture: context.read<VoiceCaptureService>(),
+                        wakeLock: context.read<ScreenWakeLockService>(),
+                      ),
+                    ),
+                    ChangeNotifierProvider(
+                      create: (context) => HandsFreeViewModel(
+                        speechService: context.read<SpeechService>(),
+                      ),
+                    ),
+                  ],
                   child: const HandsFreeModeScreen(),
                 );
               },

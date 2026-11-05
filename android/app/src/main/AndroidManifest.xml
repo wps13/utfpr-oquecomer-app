@@ -67,5 +67,10 @@
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
         </intent>
+        <!-- Android 11+: sem esta declaração o app não enxerga o motor de voz
+             (flutter_tts, leitura em voz alta do modo mãos livres). -->
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE"/>
+        </intent>
     </queries>
 </manifest>
