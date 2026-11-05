@@ -20,6 +20,7 @@ import '../ui/favorites/widgets/favorites_screen.dart';
 import '../ui/hands_free_mode/widgets/hands_free_mode_screen.dart';
 import '../ui/hands_free_mode/view_models/hands_free_mode_viewmodel.dart';
 import '../data/services/voice/voice_capture_service.dart';
+import '../data/services/screen_wake_lock/screen_wake_lock_service.dart';
 import '../ui/home/widgets/home_screen.dart';
 import '../ui/home/view_models/home_viewmodel.dart';
 import '../ui/inventory/widgets/inventory_screen.dart';
@@ -136,6 +137,7 @@ final GoRouter router = GoRouter(
                     catalogRepository: context.read<CatalogRepository>(),
                     favoritesRepository: context.read<FavoritesRepository>(),
                     capture: context.read<VoiceCaptureService>(),
+                    wakeLock: context.read<ScreenWakeLockService>(),
                     speechService: context.read<SpeechService>(),
                     permissions: context.read<PermissionService>(),
                     errorReporter: context.read<ErrorReporter>(),

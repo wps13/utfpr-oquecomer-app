@@ -21,6 +21,10 @@ import 'package:provider/provider.dart';
 
 import '../../testing/fakes/fake_catalog_repository.dart';
 import '../../testing/fakes/fake_speech_service.dart';
+import '../../testing/fakes/fake_screen_wake_lock_service.dart';
+
+import 'package:o_que_comer_app/data/services/screen_wake_lock/screen_wake_lock_service.dart';
+
 import '../../testing/fakes/fake_voice_capture_service.dart';
 import '../../testing/fakes/fake_voice_permissions.dart';
 
@@ -87,6 +91,9 @@ void main() {
                 value: _ImmediateFavoritesRepository(),
               ),
               Provider<SpeechService>.value(value: speechService),
+              Provider<ScreenWakeLockService>.value(
+                value: FakeScreenWakeLockService(),
+              ),
               Provider<VoiceCaptureService>.value(value: capture),
               Provider<PermissionService>.value(value: FakeVoicePermissions()),
               Provider<ErrorReporter>.value(

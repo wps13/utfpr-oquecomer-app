@@ -7,6 +7,7 @@ import 'package:o_que_comer_app/data/services/permissions/permission_handler_ser
 import 'package:o_que_comer_app/data/services/voice/device_voice_capture_service.dart';
 import 'package:o_que_comer_app/data/services/voice/speech_to_text_engine.dart';
 import 'package:o_que_comer_app/data/services/voice/voice_capture_service.dart';
+import 'package:o_que_comer_app/data/services/screen_wake_lock/screen_wake_lock_service.dart';
 import 'package:o_que_comer_app/domain/models/voice_command.dart';
 import 'package:o_que_comer_app/ui/hands_free_mode/view_models/voice_commands_viewmodel.dart';
 
@@ -47,7 +48,10 @@ class _VoiceSmokeScreenState extends State<_VoiceSmokeScreen> {
       permissions: _permissions,
       errorReporter: const DisabledErrorReporter(),
     );
-    _vm = VoiceCommandsViewModel(capture: _capture);
+    _vm = VoiceCommandsViewModel(
+      capture: _capture,
+      wakeLock: WakelockPlusScreenWakeLockService(),
+    );
     _transcripts = _capture.transcripts.listen((text) {
       if (mounted) setState(() => _lastTranscript = text);
     });

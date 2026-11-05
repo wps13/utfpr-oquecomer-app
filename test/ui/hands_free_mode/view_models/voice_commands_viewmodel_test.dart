@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:o_que_comer_app/data/services/errors/error_reporter.dart';
+import 'package:o_que_comer_app/data/services/screen_wake_lock/screen_wake_lock_service.dart';
 import 'package:o_que_comer_app/data/services/voice/device_voice_capture_service.dart';
 import 'package:o_que_comer_app/data/services/voice/voice_capture_service.dart';
 import 'package:o_que_comer_app/data/services/voice/voice_recognition_engine.dart';
@@ -14,11 +15,23 @@ import '../../../../testing/voice_test_clock.dart';
 import '../../../../testing/fakes/fake_voice_permissions.dart';
 import '../../../../testing/fakes/fake_voice_recognition_engine.dart';
 
+class _FakeScreenWakeLockService implements ScreenWakeLockService {
+  int enableCalls = 0;
+  int disableCalls = 0;
+
+  @override
+  Future<void> enable() async => enableCalls++;
+
+  @override
+  Future<void> disable() async => disableCalls++;
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late FakeVoiceRecognitionEngine engine;
   late DeviceVoiceCaptureService capture;
   late VoiceCommandsViewModel vm;
+  late _FakeScreenWakeLockService wakeLock;
   late List<VoiceCommand> commands;
   late StreamSubscription<VoiceCommand> subscription;
   var disposed = false;
@@ -31,7 +44,8 @@ void main() {
       permissions: FakeVoicePermissions(),
       errorReporter: const DisabledErrorReporter(),
     );
-    vm = VoiceCommandsViewModel(capture: capture);
+    wakeLock = _FakeScreenWakeLockService();
+    vm = VoiceCommandsViewModel(capture: capture, wakeLock: wakeLock);
     commands = [];
     subscription = vm.commands.listen(commands.add);
   }

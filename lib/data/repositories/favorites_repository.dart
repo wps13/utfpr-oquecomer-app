@@ -155,6 +155,7 @@ class InMemoryFavoritesRepository implements FavoritesRepository {
   @override
   Future<void> add(Recipe recipe) async {
     await Future<void>.delayed(const Duration(milliseconds: 300));
+    _items.removeWhere((item) => item.id == recipe.id);
     _items.add(recipe);
   }
 

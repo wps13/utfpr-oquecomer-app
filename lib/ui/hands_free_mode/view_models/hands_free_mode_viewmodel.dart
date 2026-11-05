@@ -10,6 +10,7 @@ import '../../../data/repositories/favorites_repository.dart';
 import '../../../data/services/errors/error_reporter.dart';
 import '../../../data/services/permissions/permission_service.dart';
 import '../../../data/services/speech/speech_service.dart';
+import '../../../data/services/screen_wake_lock/screen_wake_lock_service.dart';
 import '../../../data/services/voice/voice_capture_service.dart';
 import '../../../domain/errors/app_failure.dart';
 import '../../../domain/models/speech_status.dart';
@@ -28,6 +29,7 @@ class HandsFreeModeViewModel extends ChangeNotifier
     required CatalogRepository catalogRepository,
     required FavoritesRepository favoritesRepository,
     required VoiceCaptureService capture,
+    required ScreenWakeLockService wakeLock,
     required SpeechService speechService,
     required PermissionService permissions,
     required ErrorReporter errorReporter,
@@ -36,7 +38,7 @@ class HandsFreeModeViewModel extends ChangeNotifier
          catalogRepository: catalogRepository,
          favoritesRepository: favoritesRepository,
        ),
-       _voice = VoiceCommandsViewModel(capture: capture),
+       _voice = VoiceCommandsViewModel(capture: capture, wakeLock: wakeLock),
        _speech = speechService,
        _permissions = permissions,
        _errorReporter = errorReporter {

@@ -43,9 +43,10 @@ nenhuma suspensão fica retida ao sair. Uma nova leitura mantém a captura
 suspensa enquanto interrompe a anterior. Erros esperados aparecem na tela e os
 inesperados usam `ErrorReporter` com mensagens fixas, sem transcrição ou receita.
 
-A base desta branch inclui o serviço de leitura da **APP-42 / PR #31**, anterior
-ao commit que adicionou seu painel temporário de debug. O PR #31 precisa ser
-integrado à develop antes do merge da APP-48. A APP-43 já está na develop.
+O modo reutiliza o leitor da APP-42 e o reconhecedor da APP-43, já integrados à
+`develop`. A APP-44 mantém a tela ligada enquanto a captura está ativa, incluindo
+a suspensão temporária durante a leitura. Sair, cobrir a tela ou enviar o app ao
+segundo plano libera o bloqueio de tela.
 
 ## Executar e testar
 
@@ -100,8 +101,8 @@ Os testes simulados não substituem a validação de áudio real no Android e no
 
 ### Verificações desta implementação
 
-- Suíte completa: 444 testes aprovados, cobertura global de 88,99%.
-- Após acrescentar os dois cenários de navegação: 54 testes do fluxo aprovados.
+- Suíte completa na base atualizada da develop: 456 testes aprovados,
+  cobertura global de 89,07%.
 - Análise estática sem avisos e formatação conferida.
 - Android ARM64: APK debug compilado.
 - iOS: release sem assinatura compilado com Xcode 27.1 e CocoaPods 1.17.0.

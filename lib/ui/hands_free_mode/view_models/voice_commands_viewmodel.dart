@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/widgets.dart';
 
 import '../../../data/services/voice/voice_capture_service.dart';
+import '../../../data/services/screen_wake_lock/screen_wake_lock_service.dart';
 import '../../../domain/models/voice_command.dart';
 import '../../../domain/models/voice_failure.dart';
 import '../../../domain/voice/voice_command_interpreter.dart';
@@ -12,6 +13,7 @@ class VoiceCommandsViewModel extends ChangeNotifier
     with WidgetsBindingObserver {
   VoiceCommandsViewModel({
     required VoiceCaptureService capture,
+    required this.wakeLock,
     VoiceCommandInterpreter? interpreter,
   }) : _capture = capture,
        _interpreter = interpreter ?? VoiceCommandInterpreter() {
@@ -32,6 +34,7 @@ class VoiceCommandsViewModel extends ChangeNotifier
   }
 
   final VoiceCaptureService _capture;
+  final ScreenWakeLockService wakeLock;
   final VoiceCommandInterpreter _interpreter;
   final _commands = StreamController<VoiceCommand>.broadcast();
   late final StreamSubscription<String> _texts;
@@ -41,6 +44,7 @@ class VoiceCommandsViewModel extends ChangeNotifier
   VoiceFailure? _failure;
   bool _disposed = false;
   bool _enabled = false;
+  int _startRequest = 0;
 
   Stream<VoiceCommand> get commands => _commands.stream;
   VoiceCaptureState get state => _state;
@@ -48,15 +52,23 @@ class VoiceCommandsViewModel extends ChangeNotifier
 
   Future<void> start() async {
     if (_disposed) return;
+    final request = ++_startRequest;
     _enabled = true;
     _failure = null;
     notifyListeners();
+    await wakeLock.enable();
+    // Sair ou ir ao segundo plano pode ocorrer durante a chamada nativa.
+    if (_disposed || !_enabled || request != _startRequest) {
+      if (_disposed || !_enabled) await wakeLock.disable();
+      return;
+    }
     await _capture.start();
   }
 
-  Future<void> stop() {
+  Future<void> stop() async {
+    ++_startRequest;
     _enabled = false;
-    return _capture.stop();
+    await Future.wait([_capture.stop(), wakeLock.disable()]);
   }
 
   Future<T> duringPlayback<T>(Future<T> Function() playback) =>
@@ -85,6 +97,7 @@ class VoiceCommandsViewModel extends ChangeNotifier
   @override
   void dispose() {
     _disposed = true;
+    ++_startRequest;
     _enabled = false;
     WidgetsBinding.instance.removeObserver(this);
     unawaited(_texts.cancel());
@@ -92,6 +105,7 @@ class VoiceCommandsViewModel extends ChangeNotifier
     unawaited(_states.cancel());
     unawaited(_commands.close());
     unawaited(_capture.stop());
+    unawaited(wakeLock.disable());
     super.dispose();
   }
 }

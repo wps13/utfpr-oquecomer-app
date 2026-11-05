@@ -16,6 +16,7 @@ import 'package:provider/provider.dart';
 import '../../../../testing/fakes/fake_catalog_repository.dart';
 import '../../../../testing/fakes/fake_favorites_repository.dart';
 import '../../../../testing/fakes/fake_speech_service.dart';
+import '../../../../testing/fakes/fake_screen_wake_lock_service.dart';
 import '../../../../testing/fakes/fake_voice_capture_service.dart';
 import '../../../../testing/fakes/fake_voice_permissions.dart';
 
@@ -71,6 +72,7 @@ void main() {
             catalogRepository: catalog,
             favoritesRepository: FakeFavoritesRepository(),
             capture: capture,
+            wakeLock: FakeScreenWakeLockService(),
             speechService: speech,
             permissions: permissions,
             errorReporter: const DisabledErrorReporter(),

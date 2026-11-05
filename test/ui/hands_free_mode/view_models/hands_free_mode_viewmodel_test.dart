@@ -14,6 +14,7 @@ import 'package:o_que_comer_app/ui/hands_free_mode/view_models/hands_free_mode_v
 import '../../../../testing/fakes/fake_catalog_repository.dart';
 import '../../../../testing/fakes/fake_favorites_repository.dart';
 import '../../../../testing/fakes/fake_speech_service.dart';
+import '../../../../testing/fakes/fake_screen_wake_lock_service.dart';
 import '../../../../testing/fakes/fake_voice_capture_service.dart';
 import '../../../../testing/fakes/fake_voice_permissions.dart';
 
@@ -32,6 +33,16 @@ class _SlowStopSpeech extends FakeSpeechService {
   }
 }
 
+class _SlowWakeLock extends FakeScreenWakeLockService {
+  final ready = Completer<void>();
+
+  @override
+  Future<void> enable() async {
+    await ready.future;
+    await super.enable();
+  }
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   late FakeVoiceCaptureService capture;
@@ -39,6 +50,7 @@ void main() {
   late FakeCatalogRepository catalog;
   late FakeFavoritesRepository favorites;
   late FakeVoicePermissions permissions;
+  late FakeScreenWakeLockService wakeLock;
   late HandsFreeModeViewModel vm;
 
   Recipe recipe({List<String>? steps}) => Recipe(
@@ -49,16 +61,19 @@ void main() {
     source: RecipeSource.catalog,
   );
 
-  HandsFreeModeViewModel create({FakeSpeechService? reader}) =>
-      HandsFreeModeViewModel(
-        recipeId: '42',
-        catalogRepository: catalog,
-        favoritesRepository: favorites,
-        capture: capture,
-        speechService: reader ?? speech,
-        permissions: permissions,
-        errorReporter: const DisabledErrorReporter(),
-      );
+  HandsFreeModeViewModel create({
+    FakeSpeechService? reader,
+    FakeScreenWakeLockService? lock,
+  }) => HandsFreeModeViewModel(
+    recipeId: '42',
+    catalogRepository: catalog,
+    favoritesRepository: favorites,
+    capture: capture,
+    wakeLock: lock ?? wakeLock,
+    speechService: reader ?? speech,
+    permissions: permissions,
+    errorReporter: const DisabledErrorReporter(),
+  );
 
   Future<void> flush() => Future<void>.delayed(Duration.zero);
 
@@ -68,6 +83,7 @@ void main() {
     catalog = FakeCatalogRepository()..recipes = [recipe()];
     favorites = FakeFavoritesRepository();
     permissions = FakeVoicePermissions();
+    wakeLock = FakeScreenWakeLockService();
     vm = create();
   });
 
@@ -345,6 +361,40 @@ void main() {
     expect(vm.steps, isEmpty);
     expect(capture.startCalls, 0);
   });
+
+  test(
+    'wake lock stays enabled through reading and is released on exit',
+    () async {
+      await vm.load();
+      expect(wakeLock.enabled, isTrue);
+      final reading = vm.readStep();
+      await flush();
+      expect(wakeLock.enabled, isTrue);
+      speech.complete();
+      await reading;
+      expect(wakeLock.enabled, isTrue);
+      vm.exit();
+      await flush();
+      expect(wakeLock.enabled, isFalse);
+    },
+  );
+
+  test(
+    'leaving during wake lock startup never starts the microphone later',
+    () async {
+      vm.dispose();
+      final slow = _SlowWakeLock();
+      vm = create(lock: slow);
+      final loading = vm.load();
+      await flush();
+      vm.exit();
+      slow.ready.complete();
+      await loading;
+      expect(capture.startCalls, 0);
+      expect(capture.state, VoiceCaptureState.stopped);
+      expect(slow.enabled, isFalse);
+    },
+  );
 
   test('saved recipe remains available when the catalog fails', () async {
     catalog.loadRecipe = (_) async => throw const NoConnectionFailure();
