@@ -3,10 +3,14 @@ import 'dart:typed_data';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:o_que_comer_app/data/repositories/ai_repository.dart';
 import 'package:o_que_comer_app/domain/models/recipe.dart';
+import 'package:o_que_comer_app/domain/models/ai_failure.dart';
 import 'package:o_que_comer_app/ui/ai_recipes/view_models/ai_recipes_viewmodel.dart';
+
+import '../../../../testing/fakes/fake_pantry_repository.dart';
 
 class _FakeAiRepository implements AiRepository {
   List<String> foods = ['tomate', 'ovo', 'cebola'];
+  Exception? identifyError;
   List<String>? generatedWith;
   int? generatedServings;
   String? generatedLocation;
@@ -15,7 +19,11 @@ class _FakeAiRepository implements AiRepository {
   Future<List<String>> identifyFoods({
     required Uint8List imageBytes,
     required String mimeType,
-  }) async => foods;
+  }) async {
+    final error = identifyError;
+    if (error != null) throw error;
+    return foods;
+  }
 
   @override
   Future<Recipe> generateRecipe(
@@ -40,11 +48,104 @@ class _FakeAiRepository implements AiRepository {
 }
 
 void main() {
+  group('despensa', () {
+    late _FakeAiRepository repository;
+    late FakePantryRepository pantry;
+    late AiRecipesViewModel viewModel;
+
+    setUp(() {
+      repository = _FakeAiRepository();
+      pantry = FakePantryRepository();
+      viewModel = AiRecipesViewModel(
+        repository: repository,
+        pantryRepository: pantry,
+      );
+      viewModel.setImage(
+        bytes: Uint8List.fromList([1]),
+        mimeType: 'image/jpeg',
+      );
+    });
+
+    test('guarda os alimentos detectados após enviar a imagem', () async {
+      await viewModel.generateRecipe();
+
+      expect(pantry.scans, [
+        ['tomate', 'ovo', 'cebola'],
+      ]);
+    });
+
+    test(
+      'guarda tudo o que foi detectado, mesmo se o usuário remover',
+      () async {
+        await viewModel.generateRecipe();
+        viewModel.removeIngredient('ovo');
+        await viewModel.generateRecipe();
+
+        expect(pantry.scans, [
+          ['tomate', 'ovo', 'cebola'],
+        ]);
+      },
+    );
+
+    test('gerar a receita não guarda os alimentos de novo', () async {
+      await viewModel.generateRecipe();
+      await viewModel.generateRecipe();
+      await viewModel.generateRecipe();
+
+      expect(pantry.scans, hasLength(1));
+    });
+
+    test('um novo escaneamento guarda de novo', () async {
+      await viewModel.generateRecipe();
+      viewModel.setImage(bytes: Uint8List.fromList([2]), mimeType: 'image/png');
+      await viewModel.generateRecipe();
+
+      expect(pantry.scans, hasLength(2));
+    });
+
+    test('se o escaneamento falhar, nada é guardado', () async {
+      repository.identifyError = const AiFailure(AiFailureKind.connection);
+
+      await viewModel.generateRecipe();
+
+      expect(pantry.scans, isEmpty);
+      expect(viewModel.errorMessage, isNotNull);
+      expect(viewModel.foodsDetected, isFalse);
+    });
+
+    test('se nenhum alimento for detectado, nada é guardado', () async {
+      repository.foods = const [];
+
+      await viewModel.generateRecipe();
+
+      expect(pantry.scans, isEmpty);
+      expect(viewModel.errorMessage, isNotNull);
+    });
+
+    test('falha ao guardar não impede de seguir com a receita', () async {
+      pantry.error = Exception('disco cheio');
+
+      await viewModel.generateRecipe();
+
+      expect(viewModel.foodsDetected, isTrue);
+      expect(viewModel.detectedIngredients, ['tomate', 'ovo', 'cebola']);
+      expect(viewModel.errorMessage, isNull);
+      expect(viewModel.isLoading, isFalse);
+
+      await viewModel.generateRecipe();
+
+      expect(viewModel.recipe, isNotNull);
+    });
+  });
+
   test(
     'remove ingredientes antes de gerar e envia apenas os restantes',
     () async {
       final repository = _FakeAiRepository();
-      final viewModel = AiRecipesViewModel(repository: repository);
+      final viewModel = AiRecipesViewModel(
+        repository: repository,
+        pantryRepository: FakePantryRepository(),
+      );
       viewModel.setImage(
         bytes: Uint8List.fromList([1]),
         mimeType: 'image/jpeg',
@@ -64,7 +165,10 @@ void main() {
 
   test('envia a quantidade de pessoas escolhida', () async {
     final repository = _FakeAiRepository();
-    final viewModel = AiRecipesViewModel(repository: repository);
+    final viewModel = AiRecipesViewModel(
+      repository: repository,
+      pantryRepository: FakePantryRepository(),
+    );
     viewModel.setImage(bytes: Uint8List.fromList([1]), mimeType: 'image/jpeg');
     viewModel.setServings(5);
 
@@ -77,7 +181,10 @@ void main() {
 
   test('envia a localização regional selecionada', () async {
     final repository = _FakeAiRepository();
-    final viewModel = AiRecipesViewModel(repository: repository);
+    final viewModel = AiRecipesViewModel(
+      repository: repository,
+      pantryRepository: FakePantryRepository(),
+    );
     viewModel.setImage(bytes: Uint8List.fromList([1]), mimeType: 'image/jpeg');
     viewModel.setLocation('Curitiba, PR');
 
@@ -88,7 +195,10 @@ void main() {
   });
 
   test('ignora quantidade de pessoas menor que o mínimo', () {
-    final viewModel = AiRecipesViewModel(repository: _FakeAiRepository());
+    final viewModel = AiRecipesViewModel(
+      repository: _FakeAiRepository(),
+      pantryRepository: FakePantryRepository(),
+    );
 
     viewModel.setServings(AiRecipesViewModel.minServings - 1);
     expect(viewModel.servings, AiRecipesViewModel.defaultServings);
@@ -100,7 +210,10 @@ void main() {
     'desabilita a geração quando todos os ingredientes são removidos',
     () async {
       final repository = _FakeAiRepository();
-      final viewModel = AiRecipesViewModel(repository: repository);
+      final viewModel = AiRecipesViewModel(
+        repository: repository,
+        pantryRepository: FakePantryRepository(),
+      );
       viewModel.setImage(
         bytes: Uint8List.fromList([1]),
         mimeType: 'image/jpeg',

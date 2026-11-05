@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../../data/repositories/ai_repository.dart';
+import '../../../data/repositories/pantry_repository.dart';
 import '../../../domain/errors/app_failure.dart';
 import '../../../domain/models/ai_failure.dart';
 import '../../../domain/models/recipe.dart';
@@ -9,11 +10,17 @@ class AiRecipesViewModel extends ChangeNotifier {
   static const defaultServings = 1;
   static const minServings = 1;
 
-  AiRecipesViewModel({required AiRepository repository})
+  AiRecipesViewModel({
+    required AiRepository repository,
+    required PantryRepository pantryRepository,
+  })
     // ignore: prefer_initializing_formals
-    : _repository = repository;
+    : _repository = repository,
+       // ignore: prefer_initializing_formals
+       _pantryRepository = pantryRepository;
 
   final AiRepository _repository;
+  final PantryRepository _pantryRepository;
   Uint8List? _imageBytes;
   String? _mimeType;
   Recipe? _recipe;
@@ -96,6 +103,7 @@ class AiRecipesViewModel extends ChangeNotifier {
         _detectedIngredients = foods;
         _foodsDetected = true;
         _debugLog('generateRecipe: alimentos identificados');
+        await _rememberScannedFoods(foods);
         return;
       }
 
@@ -122,6 +130,21 @@ class AiRecipesViewModel extends ChangeNotifier {
     } finally {
       _loading = false;
       _notify();
+    }
+  }
+
+  /// Guarda na despensa tudo o que o escaneamento detectou, antes de o
+  /// usuário remover itens da tela. Só é chamado depois de um escaneamento
+  /// bem-sucedido. Uma falha ao gravar já foi reportada pelo repositório e
+  /// não deve impedir a geração da receita.
+  Future<void> _rememberScannedFoods(List<String> foods) async {
+    try {
+      await _pantryRepository.saveScanned(foods);
+    } on Object catch (error, stackTrace) {
+      _debugLog(
+        'generateRecipe: falha ao guardar na despensa ${error.runtimeType}',
+        stackTrace,
+      );
     }
   }
 

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'routes.dart';
 import '../data/repositories/ai_repository.dart';
 import '../data/repositories/favorites_repository.dart';
+import '../data/repositories/pantry_repository.dart';
 import '../data/repositories/catalog_repository.dart';
 import '../data/services/speech/speech_service.dart';
 import '../domain/models/recipe_category.dart';
@@ -54,8 +55,10 @@ final GoRouter router = GoRouter(
           path: Routes.aiRecipe,
           builder: (context, state) {
             return ChangeNotifierProvider(
-              create: (context) =>
-                  AiRecipesViewModel(repository: context.read<AiRepository>()),
+              create: (context) => AiRecipesViewModel(
+                repository: context.read<AiRepository>(),
+                pantryRepository: context.read<PantryRepository>(),
+              ),
               child: const AiRecipesScreen(),
             );
           },
