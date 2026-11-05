@@ -66,4 +66,21 @@ void main() {
     expect(await repository.getFavorites(), isEmpty);
     expect(await repository.isFavorite('1'), isFalse);
   });
+
+  test('salvar a mesma receita novamente não duplica o registro', () async {
+    final recipe = Recipe(
+      id: 'ai-1',
+      title: 'Sopa',
+      ingredients: const ['água'],
+      steps: const ['Ferva'],
+      source: RecipeSource.ai,
+    );
+
+    await repository.save(recipe);
+    await repository.save(recipe);
+
+    expect((await repository.getFavorites()).map((favorite) => favorite.id), [
+      'ai-1',
+    ]);
+  });
 }

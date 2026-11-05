@@ -44,10 +44,21 @@ class FavoritesViewModel extends ChangeNotifier {
     _favorites = await _repository.getFavorites();
   });
 
-  Future<void> remove(String id) => _run(() async {
-    await _repository.remove(id);
-    _favorites = await _repository.getFavorites();
-  });
+  Future<void> remove(String id) async {
+    final previous = _favorites;
+    _favorites = previous.where((favorite) => favorite.id != id).toList();
+    notifyListeners();
+    try {
+      await _repository.remove(id);
+      _errorMessage = null;
+      _setState(ViewState.success);
+    } on Object catch (e) {
+      _favorites = previous;
+      _errorMessage = e.toString();
+      notifyListeners();
+      _setState(ViewState.error);
+    }
+  }
 
   Future<void> _run(Future<void> Function() action) async {
     // O estado inicial já é `loading`; assim a chamada feita no initState

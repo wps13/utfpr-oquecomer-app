@@ -44,6 +44,28 @@ void main() {
     expect(calls, isEmpty);
   });
 
+  test('speech recognition on Android needs no extra permission', () async {
+    expect(
+      await service.check(AppPermission.speechRecognition),
+      PermissionAccess.granted,
+    );
+    expect(
+      await service.request(AppPermission.speechRecognition),
+      PermissionAccess.granted,
+    );
+    expect(calls, isEmpty);
+  });
+
+  test('speech recognition uses the dedicated iOS authorization', () async {
+    service = PermissionHandlerService(platform: TargetPlatform.iOS);
+    expect(
+      await service.request(AppPermission.speechRecognition),
+      PermissionAccess.granted,
+    );
+    expect(calls.first.arguments, Permission.speech.value);
+    expect(calls.last.arguments, [Permission.speech.value]);
+  });
+
   test('check reads status without requesting permission', () async {
     expect(await service.check(AppPermission.camera), PermissionAccess.denied);
     expect(calls.map((call) => call.method), ['checkPermissionStatus']);

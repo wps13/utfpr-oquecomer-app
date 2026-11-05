@@ -48,7 +48,7 @@ toque no recurso consulta o estado novamente, inclusive após voltar dos ajustes
 
 Os textos do diálogo nativo do Android são definidos pelo sistema e seguem o
 idioma do dispositivo. As justificativas personalizadas em português são
-apresentadas pelo componente Flutter. No iOS, os quatro textos do diálogo nativo
+apresentadas pelo componente Flutter. No iOS, os textos do diálogo nativo
 estão no `Info.plist`.
 
 ## Recursos e versões
@@ -58,6 +58,7 @@ estão no `Info.plist`.
 | Câmera | `CAMERA` | `NSCameraUsageDescription` |
 | Localização em uso | `ACCESS_COARSE_LOCATION` / `ACCESS_FINE_LOCATION` | `NSLocationWhenInUseUsageDescription` |
 | Microfone | `RECORD_AUDIO` | `NSMicrophoneUsageDescription` |
+| Reconhecimento de fala (APP-43) | Sem autorização adicional ao microfone | `NSSpeechRecognitionUsageDescription` |
 | Fotos até Android 12L | `READ_EXTERNAL_STORAGE`, limitado à API 32 | `NSPhotoLibraryUsageDescription` |
 | Fotos no Android 13+ | `READ_MEDIA_IMAGES` | `NSPhotoLibraryUsageDescription` |
 | Fotos selecionadas no Android 14+ | `READ_MEDIA_VISUAL_USER_SELECTED` | Acesso limitado disponível desde iOS 14 |
@@ -88,8 +89,9 @@ O Android usa `compileSdk = 37`, exigido por `permission_handler_android` 14.1.0
 O `minSdk` e o `targetSdk` seguem os valores do Flutter do projeto.
 
 O projeto iOS usa Swift Package Manager. `permission_handler_apple` 9.6.2 habilita
-as estratégias pela presença das chaves no `Info.plist`; somente localização
-durante o uso está configurada. Não é necessário criar um `Podfile`. Para builds
+as estratégias pela presença das chaves no `Info.plist`; a localização usa
+somente a autorização durante o uso. A APP-43 acrescenta a estratégia de fala.
+Não é necessário criar um `Podfile`. Para builds
 iniciados pela interface do Xcode, o plugin exige indicar o arquivo explicitamente
 antes de abrir o Xcode:
 
@@ -101,6 +103,42 @@ O comando deve ser executado na raiz deste projeto. Reabra o Xcode depois de
 definir a variável. Builds pelo terminal, iniciados na raiz do projeto,
 detectam o arquivo automaticamente. Consulte a documentação do plugin caso o
 cache do Swift Package Manager tenha sido resolvido antes de alterar as chaves.
+Depois de adicionar ou remover uma chave do Info.plist, invalide o cache de
+pacotes/DerivedData desse workspace para que o manifesto seja reavaliado. Na
+APP-43 isso é necessário para trocar `PERMISSION_SPEECH_RECOGNIZER=0` por `1`
+em checkouts que já tinham compilado iOS. Um build bem-sucedido, isoladamente,
+não confirma que a estratégia de permissão está habilitada.
+
+Para reavaliar somente o cache deste workspace, encerre os builds e feche o
+Xcode. Na raiz do projeto, o comando abaixo identifica o cache pelo caminho do
+workspace e o move para um backup temporário:
+
+```sh
+python3 - <<'PY'
+from pathlib import Path
+import plistlib
+import tempfile
+
+workspace = Path('ios/Runner.xcworkspace').resolve()
+assert workspace.is_dir(), 'Execute na raiz do projeto Flutter.'
+derived_data = Path.home() / 'Library/Developer/Xcode/DerivedData'
+for cache in derived_data.glob('Runner-*'):
+    metadata = cache / 'info.plist'
+    if not metadata.is_file():
+        continue
+    recorded = plistlib.loads(metadata.read_bytes()).get('WorkspacePath')
+    if not recorded or not Path(recorded).exists():
+        continue
+    if Path(recorded).samefile(workspace):
+        backup = Path(tempfile.mkdtemp(prefix='oquecomer-xcode-')) / cache.name
+        cache.rename(backup)
+        print(f'Cache movido para {backup}')
+PY
+```
+
+Depois, reabra o Xcode ou execute novamente `flutter build ios`. O backup contém
+arquivos gerados, não o código do aplicativo. Esse cuidado ao alterar chaves é
+descrito no [guia do plugin](https://github.com/Baseflow/flutter-permission-handler/blob/main/permission_handler/README.md).
 
 ```sh
 dart format --output=none --set-exit-if-changed lib test testing tool

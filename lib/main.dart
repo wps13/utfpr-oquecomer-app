@@ -22,7 +22,11 @@ import 'data/services/errors/http_error_reporter.dart';
 import 'data/services/location/location_service.dart';
 import 'data/services/permissions/permission_handler_service.dart';
 import 'data/services/permissions/permission_service.dart';
+import 'data/services/screen_wake_lock/screen_wake_lock_service.dart';
 import 'data/services/speech/speech_service.dart';
+import 'data/services/voice/device_voice_capture_service.dart';
+import 'data/services/voice/speech_to_text_engine.dart';
+import 'data/services/voice/voice_capture_service.dart';
 import 'ui/core/themes/theme.dart';
 import 'ui/favorites/view_models/favorites_viewmodel.dart';
 
@@ -65,6 +69,17 @@ Future<void> main() async {
               HttpErrorReporter(errorReporter: c.read<ErrorReporter>()),
         ),
         Provider<PermissionService>(create: (_) => PermissionHandlerService()),
+        Provider<ScreenWakeLockService>(
+          create: (_) => WakelockPlusScreenWakeLockService(),
+        ),
+        Provider<VoiceCaptureService>(
+          create: (c) => DeviceVoiceCaptureService(
+            engine: SpeechToTextEngine(),
+            permissions: c.read<PermissionService>(),
+            errorReporter: c.read<ErrorReporter>(),
+          ),
+          dispose: (_, service) => unawaited(service.dispose()),
+        ),
         Provider<LocationService>(create: (_) => DeviceLocationService()),
         Provider<DeviceSpeechService>(
           create: (_) => DeviceSpeechService(),
