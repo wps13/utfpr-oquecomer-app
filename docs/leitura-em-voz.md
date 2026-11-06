@@ -48,17 +48,25 @@ encerram a leitura e devolvem o estado para `idle`.
 
 ## Modo mãos livres
 
-A rota do modo mãos livres cria a `HandsFreeViewModel`, que expõe `readStep`,
-`pause`, `stop`, `speechStatus` e `errorMessage`. Ao sair da tela, a ViewModel é
-descartada e interrompe a leitura. A interface e a navegação entre os passos
-ficam para a tela do modo mãos livres.
+A [APP-48](modo-maos-livres.md) conecta `SpeechService` aos passos da receita
+com `HandsFreeModeViewModel`. A ViewModel mantém o reconhecedor de comandos
+suspenso até o status da leitura indicar conclusão, pausa ou cancelamento; o
+retorno de `speak()` sozinho não significa que o áudio terminou. Ao sair, cobrir
+a tela ou enviar o app ao segundo plano, captura e leitura são interrompidas.
+
+`HandsFreeViewModel`, introduzida na APP-42, continua disponível como consumidor
+simples do serviço para contextos que precisam apenas de leitura.
 
 ## Configuração das plataformas
 
 - Android: o `AndroidManifest.xml` declara a ação
   `android.intent.action.TTS_SERVICE` em `<queries>`. Sem ela, o Android 11+
   não encontra o motor de voz.
-- iOS: não há permissão nem entrada no `Info.plist`.
+- iOS: a síntese não exige permissão nem entrada adicional no `Info.plist`.
+  `flutter_tts` 4.2.5 ainda usa CocoaPods. O projeto mantém `ios/Podfile` e os
+  includes de Pods nos `.xcconfig`, junto dos demais plugins via SwiftPM.
+  Instale CocoaPods (`brew install cocoapods`) antes do primeiro build iOS e
+  abra `ios/Runner.xcworkspace` ao usar o Xcode.
 
 ## Testes
 

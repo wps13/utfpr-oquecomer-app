@@ -3,6 +3,9 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import 'routes.dart';
+import 'route_observer.dart';
+import '../data/services/errors/error_reporter.dart';
+import '../data/services/permissions/permission_service.dart';
 import '../data/repositories/ai_repository.dart';
 import '../data/repositories/favorites_repository.dart';
 import '../data/repositories/pantry_repository.dart';
@@ -15,9 +18,8 @@ import '../ui/ai_recipes/view_models/ai_recipes_viewmodel.dart';
 import '../ui/catalog/widgets/catalog_screen.dart';
 import '../ui/catalog/view_models/catalog_viewmodel.dart';
 import '../ui/favorites/widgets/favorites_screen.dart';
-import '../ui/hands_free_mode/view_models/hands_free_viewmodel.dart';
 import '../ui/hands_free_mode/widgets/hands_free_mode_screen.dart';
-import '../ui/hands_free_mode/view_models/voice_commands_viewmodel.dart';
+import '../ui/hands_free_mode/view_models/hands_free_mode_viewmodel.dart';
 import '../data/services/voice/voice_capture_service.dart';
 import '../data/services/screen_wake_lock/screen_wake_lock_service.dart';
 import '../ui/home/widgets/home_screen.dart';
@@ -33,6 +35,7 @@ final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>();
 
 final GoRouter router = GoRouter(
   navigatorKey: _rootNavigatorKey,
+  observers: [appRouteObserver],
   initialLocation: Routes.home,
   // Rota inválida ou falha de navegação: volta para a home.
   onException: (context, state, router) => router.go(Routes.home),
@@ -135,20 +138,19 @@ final GoRouter router = GoRouter(
             GoRoute(
               path: 'hands-free',
               builder: (context, state) {
-                return MultiProvider(
-                  providers: [
-                    ChangeNotifierProvider(
-                      create: (context) => VoiceCommandsViewModel(
-                        capture: context.read<VoiceCaptureService>(),
-                        wakeLock: context.read<ScreenWakeLockService>(),
-                      ),
-                    ),
-                    ChangeNotifierProvider(
-                      create: (context) => HandsFreeViewModel(
-                        speechService: context.read<SpeechService>(),
-                      ),
-                    ),
-                  ],
+                final id = state.pathParameters['id']!;
+                return ChangeNotifierProvider(
+                  key: ValueKey(id),
+                  create: (context) => HandsFreeModeViewModel(
+                    recipeId: id,
+                    catalogRepository: context.read<CatalogRepository>(),
+                    favoritesRepository: context.read<FavoritesRepository>(),
+                    capture: context.read<VoiceCaptureService>(),
+                    wakeLock: context.read<ScreenWakeLockService>(),
+                    speechService: context.read<SpeechService>(),
+                    permissions: context.read<PermissionService>(),
+                    errorReporter: context.read<ErrorReporter>(),
+                  ),
                   child: const HandsFreeModeScreen(),
                 );
               },

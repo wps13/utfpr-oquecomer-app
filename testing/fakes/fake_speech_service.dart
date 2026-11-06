@@ -22,6 +22,8 @@ class FakeSpeechService implements SpeechService {
     _status.value = SpeechStatus.speaking;
   }
 
+  void complete() => _status.value = SpeechStatus.idle;
+
   @override
   Future<void> pause() async {
     pauseCalls++;

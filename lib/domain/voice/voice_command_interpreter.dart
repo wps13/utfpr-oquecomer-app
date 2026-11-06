@@ -66,6 +66,7 @@ class VoiceCommandInterpreter {
       'sair do modo',
       'sair do modo mãos livres',
       'sair do modo hands free',
+      'cancelar hands-free',
       'encerrar modo',
       'encerrar modo mãos livres',
       'desativar modo mãos livres',

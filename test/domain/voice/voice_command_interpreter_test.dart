@@ -27,6 +27,10 @@ void main() {
       interpreter.interpret('SAIR DO MODO MÃOS LIVRES.'),
       VoiceCommand.exitMode,
     );
+    expect(
+      interpreter.interpret('CANCELAR HANDS-FREE!'),
+      VoiceCommand.exitMode,
+    );
     expect(interpreter.interpret('AVANÇAR!'), VoiceCommand.nextStep);
   });
 
@@ -48,9 +52,10 @@ void main() {
     }
   });
 
-  test('sair e sair do modo permanecem intenções distintas', () {
+  test('comandos de saída são reconhecidos como intenções de encerramento', () {
     expect(interpreter.interpret('sair'), VoiceCommand.exit);
     expect(interpreter.interpret('sair do modo'), VoiceCommand.exitMode);
+    expect(interpreter.interpret('cancelar hands-free'), VoiceCommand.exitMode);
   });
 
   test('permite ampliar aliases sem alterar o interpretador', () {
