@@ -10,6 +10,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:o_que_comer_app/data/repositories/ai_repository.dart';
 import 'package:o_que_comer_app/data/repositories/catalog_repository.dart';
 import 'package:o_que_comer_app/data/repositories/favorites_repository.dart';
+import 'package:o_que_comer_app/data/repositories/pantry_repository.dart';
 import 'package:o_que_comer_app/data/services/speech/speech_service.dart';
 import 'package:o_que_comer_app/domain/models/recipe.dart';
 import 'package:o_que_comer_app/routing/router.dart';
@@ -20,6 +21,7 @@ import 'package:o_que_comer_app/ui/hands_free_mode/widgets/hands_free_mode_scree
 import 'package:provider/provider.dart';
 
 import '../../testing/fakes/fake_catalog_repository.dart';
+import '../../testing/fakes/fake_pantry_repository.dart';
 import '../../testing/fakes/fake_speech_service.dart';
 import '../../testing/fakes/fake_screen_wake_lock_service.dart';
 
@@ -91,6 +93,7 @@ void main() {
                 value: _ImmediateFavoritesRepository(),
               ),
               Provider<SpeechService>.value(value: speechService),
+              Provider<PantryRepository>.value(value: FakePantryRepository()),
               Provider<ScreenWakeLockService>.value(
                 value: FakeScreenWakeLockService(),
               ),

@@ -15,6 +15,7 @@ import 'data/repositories/ai_repository.dart';
 import 'data/repositories/api_catalog_repository.dart';
 import 'data/repositories/catalog_repository.dart';
 import 'data/repositories/favorites_repository.dart';
+import 'data/repositories/pantry_repository.dart';
 import 'data/services/api/api_client.dart';
 import 'data/services/crash/error_reporter.dart' as http_errors;
 import 'data/services/errors/error_reporter.dart';
@@ -52,6 +53,29 @@ Future<void> main() async {
         error,
         stack,
         reason: 'Falha ao abrir a persistência local',
+      ),
+    ),
+  );
+  final PantryRepository pantryRepository = await initOrFallback(
+    () async {
+      // O Hive já foi inicializado acima; se aquela etapa falhou, esta
+      // também falha e a despensa cai para a memória.
+      final box = await Hive.openBox<dynamic>('pantry');
+      return LocalPantryRepository(
+        box: HivePantryBox(box),
+        errorReporter: errorReporter,
+      );
+    },
+    // Sem persistência: despensa em memória, vazia.
+    () => LocalPantryRepository(
+      box: InMemoryPantryBox(),
+      errorReporter: errorReporter,
+    ),
+    onError: (error, stack) => unawaited(
+      errorReporter.recordError(
+        error,
+        stack,
+        reason: 'Falha ao abrir a persistência local da despensa',
       ),
     ),
   );
@@ -109,6 +133,7 @@ Future<void> main() async {
           create: (c) => c.read<AiDependencies>().repository,
         ),
         Provider<FavoritesRepository>.value(value: favoritesRepository),
+        Provider<PantryRepository>.value(value: pantryRepository),
       ],
       child: const MainApp(),
     ),

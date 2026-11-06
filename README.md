@@ -22,6 +22,8 @@ Configuração e uso do serviço de localização: [localização](docs/localiza
 
 Uso e validação da [leitura em voz alta (APP-42)](docs/leitura-em-voz.md).
 
+Armazenamento e regras de duplicidade dos [alimentos escaneados na despensa (APP-40)](docs/despensa-escaneamento.md).
+
 Preparação do Xcode e execução no iOS: [guia de desenvolvimento](docs/desenvolvimento-ios.md).
 
 ## Executar localmente

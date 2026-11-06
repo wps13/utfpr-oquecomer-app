@@ -11,6 +11,8 @@ import 'package:o_que_comer_app/ui/ai_recipes/view_models/ai_recipes_viewmodel.d
 import 'package:o_que_comer_app/ui/ai_recipes/widgets/ai_recipes_screen.dart';
 import 'package:provider/provider.dart';
 
+import '../../../../testing/fakes/fake_pantry_repository.dart';
+
 class _FakeAiRepository implements AiRepository {
   @override
   Future<Recipe> generateRecipe(
@@ -71,7 +73,10 @@ void main() {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(
-          create: (_) => AiRecipesViewModel(repository: _FakeAiRepository()),
+          create: (_) => AiRecipesViewModel(
+            repository: _FakeAiRepository(),
+            pantryRepository: FakePantryRepository(),
+          ),
         ),
         Provider<PermissionService>.value(value: permissionService),
         Provider<LocationService>.value(value: locationService),
