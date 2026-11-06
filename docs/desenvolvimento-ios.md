@@ -32,14 +32,22 @@ flutter build ios --config-only
 open ios/Runner.xcworkspace
 ```
 
-O deployment target atual é iOS 15.0. O projeto já usa Swift Package Manager,
-e ambos os plugins deste card oferecem suporte a ele; não há `Podfile`.
-Não instale CocoaPods para resolver este card. A necessidade deve ser reavaliada
-se um plugin futuro oferecer somente integração por CocoaPods.
+O deployment target atual é iOS 15.0. Os plugins compatíveis usam Swift Package
+Manager. O leitor `flutter_tts` 4.2.5, integrado na APP-48 a partir da APP-42,
+ainda usa CocoaPods; por isso o projeto também versiona `ios/Podfile`, seu lock
+e a integração de Pods no workspace. Instale essa ferramenta antes do build:
 
-O `flutter doctor` ainda pode mostrar `CocoaPods not installed` nessa configuração.
-Esse aviso não bloqueia os plugins atuais: o build iOS release sem assinatura
-foi validado com Xcode 27.1 usando somente Swift Package Manager.
+```sh
+brew install cocoapods
+pod --version
+```
+
+`flutter build ios` e `flutter run` instalam os Pods necessários. Ao executar pelo
+Xcode em um checkout novo, execute primeiro o build de configuração acima e
+`(cd ios && pod install)`, depois abra `ios/Runner.xcworkspace`.
+O aviso de plugin sem SwiftPM refere-se ao leitor; a integração atual usa os
+dois gerenciadores sem duplicar o Firebase. A compilação release sem assinatura
+da APP-48 foi validada com Xcode 27.1 e CocoaPods 1.17.0.
 
 As permissões de câmera, localização em uso, microfone e fotos estão declaradas
 no `ios/Runner/Info.plist`, com justificativas em português. O plugin detecta

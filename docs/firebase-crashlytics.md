@@ -25,7 +25,8 @@ flutterfire configure --project=oquecomer-app --platforms=android,ios \
 
 A CLI FlutterFire precisa estar no `PATH`, inclusive para o envio dos símbolos
 durante builds iOS. Ela usa a biblioteca Ruby `xcodeproj` para editar o projeto
-Xcode. O projeto usa Swift Package Manager para as dependências nativas iOS.
+Xcode. O Firebase usa Swift Package Manager no iOS. O leitor da APP-42/APP-48
+usa CocoaPods em paralelo, sem duplicar os plugins Firebase.
 
 O parâmetro `--out` direciona a saída Dart da CLI para um arquivo temporário
 ignorado pelo Git. `lib/firebase_options.dart` é mantido pelo projeto e lê as

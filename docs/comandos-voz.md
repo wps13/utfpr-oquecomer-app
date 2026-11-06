@@ -20,12 +20,11 @@ internet; reconhecimento offline não é garantido.
   `Stream<VoiceCommand>` e está disponível no escopo da rota de mãos livres.
   Criar a ViewModel não inicia escuta nem solicita permissões.
 
-A tela de mãos livres ainda é um placeholder. Este card não implementa botões,
-navegação entre passos ou leitura de receitas na tela de produção. O consumidor
-deve chamar `start()` após a ação explícita de entrar no modo e assinar `commands`.
-O descarte da ViewModel chama `stop()`, cancela assinaturas e remove o observador
-de ciclo de vida. Enviar o app para segundo plano também encerra a captura; voltar
-ao primeiro plano exige uma nova ativação explícita.
+A [APP-48](modo-maos-livres.md) conecta esse serviço à tela de produção, aos
+passos da receita e ao leitor da APP-42. `HandsFreeModeViewModel` cria e consome
+`VoiceCommandsViewModel` no escopo da rota. A entrada pelo botão Iniciar ativa a
+escuta; sair da tela, cobri-la com outra rota ou enviar o app ao segundo plano
+interrompe a captura. Voltar exige uma nova ativação explícita.
 
 ## Comandos
 
@@ -54,7 +53,7 @@ final; a pausa solicitada ao SDK é de dois segundos, sujeita aos limites do SO.
 
 ## Leitura em voz alta
 
-O futuro leitor deve executar cada reprodução por este ponto de integração:
+O consumidor mantém a captura suspensa até a conclusão real de cada áudio:
 
 ```dart
 await voiceViewModel.duringPlayback(
@@ -62,11 +61,11 @@ await voiceViewModel.duringPlayback(
 );
 ```
 
-`reader.readToCompletion` representa um contrato do leitor, que ainda não existe
-no projeto. Seu Future precisa terminar **ao acabar ou cancelar o áudio**, e não
-apenas ao enfileirar o texto no motor TTS. Se o pacote de leitura tiver callbacks
-de início/conclusão/cancelamento/erro, o adaptador do leitor deverá convertê-los
-em um Future de conclusão real.
+`reader.readToCompletion` no exemplo representa a operação completa de leitura.
+Na APP-48, essa ponte fica em `HandsFreeModeViewModel.readStep`: `speak()` do
+serviço da APP-42 retorna ao iniciar o áudio, e a mudança de `SpeechStatus`
+conclui o Future mantido dentro de `duringPlayback`. Pausa, troca de passo e
+saída também liberam esse Future, sem reativar o microfone antes de parar o áudio.
 
 O serviço cancela a captura antes de chamar a reprodução, bloqueia callbacks
 atrasados e retoma somente após o Future terminar. Leituras sobrepostas mantêm a
@@ -76,8 +75,8 @@ iniciar o áudio. Se a reprodução falhar, a suspensão é liberada no `finally
 
 Enquanto o áudio está sendo reproduzido, comandos também não são captados. Não
 há interrupção da leitura pela fala simultânea (barge-in) neste contrato.
-A proteção é testada com reprodução simulada; sua validação com áudio real
-depende da futura integração do leitor por esse contrato.
+A proteção é testada com reprodução simulada. A validação do leitor integrado
+com áudio e microfone reais deve seguir o [roteiro da APP-48](modo-maos-livres.md).
 
 ## Sessões, permissões e falhas
 
@@ -105,7 +104,8 @@ As permissões só são verificadas/solicitadas em `start()`:
   `NSSpeechRecognitionUsageDescription`, em português. A autorização adicional
   usa `AppPermission.speechRecognition` pelo `PermissionService` existente;
   no Android ela não solicita outra permissão.
-- A configuração iOS usa Swift Package Manager. Para builds iniciados pelo
+- Os plugins compatíveis no iOS usam Swift Package Manager; o leitor
+  `flutter_tts` usa CocoaPods. Para builds iniciados pelo
   Xcode, consulte a configuração de descoberta do Info.plist no
   [guia de permissões](permissoes.md).
 
@@ -116,7 +116,8 @@ no app compilado. O valor esperado é `PERMISSION_SPEECH_RECOGNIZER=1`.
 Esse procedimento após mudanças no Info.plist é descrito no
 [guia oficial do permission_handler](https://github.com/Baseflow/flutter-permission-handler/blob/main/permission_handler/README.md).
 Preserve os caches dos outros projetos. A limpeza é de arquivos gerados pelo
-Xcode e não exige modificar o código do plugin ou criar um Podfile.
+Xcode e não exige modificar o código do plugin. O Podfile do leitor da APP-42
+é independente dessa configuração de permissões.
 
 `VoiceFailure` diferencia microfone negado, autorização de fala negada, motor
 indisponível, pt-BR indisponível, ausência de fala, falha do motor e erro

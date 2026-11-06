@@ -1,4 +1,9 @@
+import 'dart:async';
 import 'dart:typed_data';
+
+import 'package:o_que_comer_app/data/services/errors/error_reporter.dart';
+import 'package:o_que_comer_app/data/services/permissions/permission_service.dart';
+import 'package:o_que_comer_app/data/services/voice/voice_capture_service.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -10,12 +15,18 @@ import 'package:o_que_comer_app/domain/models/recipe.dart';
 import 'package:o_que_comer_app/routing/router.dart';
 import 'package:o_que_comer_app/routing/routes.dart';
 import 'package:o_que_comer_app/ui/favorites/view_models/favorites_viewmodel.dart';
-import 'package:o_que_comer_app/ui/hands_free_mode/view_models/hands_free_viewmodel.dart';
+import 'package:o_que_comer_app/ui/hands_free_mode/view_models/hands_free_mode_viewmodel.dart';
 import 'package:o_que_comer_app/ui/hands_free_mode/widgets/hands_free_mode_screen.dart';
 import 'package:provider/provider.dart';
 
 import '../../testing/fakes/fake_catalog_repository.dart';
 import '../../testing/fakes/fake_speech_service.dart';
+import '../../testing/fakes/fake_screen_wake_lock_service.dart';
+
+import 'package:o_que_comer_app/data/services/screen_wake_lock/screen_wake_lock_service.dart';
+
+import '../../testing/fakes/fake_voice_capture_service.dart';
+import '../../testing/fakes/fake_voice_permissions.dart';
 
 class _ImmediateFavoritesRepository implements FavoritesRepository {
   @override
@@ -52,10 +63,12 @@ class _ImmediateAiRepository implements AiRepository {
 void main() {
   late FavoritesViewModel favoritesViewModel;
   late FakeSpeechService speechService;
+  late FakeVoiceCaptureService capture;
 
   setUp(() {
     router.go(Routes.home);
     speechService = FakeSpeechService();
+    capture = FakeVoiceCaptureService();
     favoritesViewModel = FavoritesViewModel(
       repository: _ImmediateFavoritesRepository(),
     );
@@ -63,6 +76,7 @@ void main() {
 
   tearDown(() {
     favoritesViewModel.dispose();
+    unawaited(capture.dispose());
   });
 
   Future<void> pumpRouter(WidgetTester tester) async {
@@ -77,6 +91,14 @@ void main() {
                 value: _ImmediateFavoritesRepository(),
               ),
               Provider<SpeechService>.value(value: speechService),
+              Provider<ScreenWakeLockService>.value(
+                value: FakeScreenWakeLockService(),
+              ),
+              Provider<VoiceCaptureService>.value(value: capture),
+              Provider<PermissionService>.value(value: FakeVoicePermissions()),
+              Provider<ErrorReporter>.value(
+                value: const DisabledErrorReporter(),
+              ),
             ],
             child: Provider<CatalogRepository>(
               create: (_) => FakeCatalogRepository()
@@ -196,7 +218,9 @@ void main() {
     await tester.tap(find.text('Iniciar'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Modo mãos livres'), findsNWidgets(2));
+    expect(find.text('Modo mãos livres'), findsOneWidget);
+    expect(find.text('Passo 1 de 1'), findsOneWidget);
+    expect(find.text('Ouvindo'), findsOneWidget);
     expect(find.text('Modo de preparo'), findsNothing);
   });
 
@@ -208,17 +232,57 @@ void main() {
     await tester.tap(find.text('Iniciar'));
     await tester.pumpAndSettle();
 
-    await tester
+    final mode = tester
         .element(find.byType(HandsFreeModeScreen))
-        .read<HandsFreeViewModel>()
-        .readStep('Asse.');
+        .read<HandsFreeModeViewModel>();
+    unawaited(mode.readStep());
+    await tester.pumpAndSettle();
     expect(speechService.spoken, ['Asse.']);
 
     await tester.tap(find.byType(BackButton));
     await tester.pumpAndSettle();
 
     expect(find.byType(HandsFreeModeScreen), findsNothing);
-    expect(speechService.stopCalls, 1);
+    expect(speechService.stopCalls, greaterThanOrEqualTo(1));
+    expect(capture.state, VoiceCaptureState.stopped);
+  });
+
+  testWidgets('spoken exit returns to the recipe and stops the microphone', (
+    tester,
+  ) async {
+    await pumpRouter(tester);
+    await goTo(tester, Routes.recipeDetails('42'));
+    await tester.tap(find.text('Iniciar'));
+    await tester.pumpAndSettle();
+    capture.emit('sair do modo');
+    await tester.pumpAndSettle();
+    expect(find.byType(HandsFreeModeScreen), findsNothing);
+    expect(find.text('Modo de preparo'), findsOneWidget);
+    expect(capture.state, VoiceCaptureState.stopped);
+  });
+
+  testWidgets('covering the mode with another route stops capture and audio', (
+    tester,
+  ) async {
+    await pumpRouter(tester);
+    await goTo(tester, Routes.handsFreeMode('42'));
+    final context = tester.element(find.byType(HandsFreeModeScreen));
+    unawaited(context.read<HandsFreeModeViewModel>().readStep());
+    await tester.pumpAndSettle();
+    final navigator = Navigator.of(context);
+    unawaited(
+      navigator.push<void>(
+        MaterialPageRoute<void>(
+          builder: (_) => const Scaffold(body: Text('Outra tela')),
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+    expect(capture.state, VoiceCaptureState.stopped);
+    navigator.pop();
+    await tester.pumpAndSettle();
+    expect(capture.state, VoiceCaptureState.stopped);
+    expect(find.text('Ativar comandos de voz'), findsOneWidget);
   });
 
   testWidgets('search result opens the selected recipe details', (

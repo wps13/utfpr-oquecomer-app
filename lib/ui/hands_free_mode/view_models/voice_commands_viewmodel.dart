@@ -44,6 +44,7 @@ class VoiceCommandsViewModel extends ChangeNotifier
   VoiceFailure? _failure;
   bool _disposed = false;
   bool _enabled = false;
+  int _startRequest = 0;
 
   Stream<VoiceCommand> get commands => _commands.stream;
   VoiceCaptureState get state => _state;
@@ -51,14 +52,21 @@ class VoiceCommandsViewModel extends ChangeNotifier
 
   Future<void> start() async {
     if (_disposed) return;
+    final request = ++_startRequest;
     _enabled = true;
     _failure = null;
     notifyListeners();
     await wakeLock.enable();
+    // Sair ou ir ao segundo plano pode ocorrer durante a chamada nativa.
+    if (_disposed || !_enabled || request != _startRequest) {
+      if (_disposed || !_enabled) await wakeLock.disable();
+      return;
+    }
     await _capture.start();
   }
 
   Future<void> stop() async {
+    ++_startRequest;
     _enabled = false;
     await Future.wait([_capture.stop(), wakeLock.disable()]);
   }
@@ -89,6 +97,7 @@ class VoiceCommandsViewModel extends ChangeNotifier
   @override
   void dispose() {
     _disposed = true;
+    ++_startRequest;
     _enabled = false;
     WidgetsBinding.instance.removeObserver(this);
     unawaited(_texts.cancel());
