@@ -10,12 +10,15 @@ e a validade dos alimentos não são guardadas.
 - `PantryItem` (`lib/domain/models/pantry_item.dart`): `name` (grafia original,
   para exibir), `scannedAt` e `id`, o nome normalizado.
 - `PantryRepository` (`lib/data/repositories/pantry_repository.dart`): interface
-  injetada nas ViewModels, com `saveScanned(foods)` e `getItems()`.
+  injetada nas ViewModels, com `saveScanned(foods)`, `getItems()` e
+  `remove(id)`.
 - `LocalPantryRepository` implementa a interface sobre uma `PantryBox`:
   `HivePantryBox` (box `pantry`, usada pelo app) ou `InMemoryPantryBox` (sem
   persistência, usada quando o armazenamento local não abre).
 - `AiRecipesViewModel` chama `saveScanned` logo depois que o escaneamento
   detecta os alimentos.
+- `InventoryViewModel` carrega o histórico e remove itens individualmente
+  depois da confirmação na tela da despensa.
 
 ## Quando os itens são guardados
 
@@ -54,6 +57,10 @@ O box `pantry` tem uma entrada por alimento, com a chave igual ao `id`:
 Os itens continuam disponíveis depois de reiniciar o app. `getItems()` os devolve
 do escaneamento mais recente para o mais antigo. Um registro ilegível ao listar
 é reportado e propagado; ao escanear o mesmo alimento, ele é sobrescrito.
+
+Na tela `Despensa`, cada item tem uma ação de remoção. A exclusão pede
+confirmação e, depois de confirmada, remove o item da lista e do box local. Se
+não houver itens, a tela exibe o estado vazio.
 
 ## Testes
 

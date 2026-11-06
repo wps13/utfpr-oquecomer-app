@@ -8,6 +8,8 @@ abstract interface class PantryBox {
 
   Object? get(String key);
 
+  Future<void> delete(String key);
+
   /// Grava todas as entradas de uma vez.
   Future<void> putAll(Map<String, Map<String, Object?>> entries);
 }
@@ -21,6 +23,8 @@ abstract interface class PantryRepository {
 
   /// Itens da despensa, do escaneamento mais recente para o mais antigo.
   Future<List<PantryItem>> getItems();
+
+  Future<void> remove(String id);
 }
 
 /// Implementação usada pela aplicação, sobre uma [PantryBox] (Hive ou memória).
@@ -65,6 +69,10 @@ class LocalPantryRepository implements PantryRepository {
     return List.unmodifiable(items);
   });
 
+  @override
+  Future<void> remove(String id) =>
+      _guard<void>('delete', () => box.delete(id));
+
   /// Registro ilegível é tratado como inexistente e sobrescrito.
   PantryItem? _existing(String id) {
     final value = box.get(id);
@@ -102,6 +110,9 @@ class HivePantryBox implements PantryBox {
   Object? get(String key) => _box.get(key);
 
   @override
+  Future<void> delete(String key) => _box.delete(key);
+
+  @override
   Future<void> putAll(Map<String, Map<String, Object?>> entries) =>
       _box.putAll(entries);
 }
@@ -115,6 +126,11 @@ class InMemoryPantryBox implements PantryBox {
 
   @override
   Object? get(String key) => _entries[key];
+
+  @override
+  Future<void> delete(String key) async {
+    _entries.remove(key);
+  }
 
   @override
   Future<void> putAll(Map<String, Map<String, Object?>> entries) async =>

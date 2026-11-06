@@ -23,6 +23,7 @@ import '../data/services/screen_wake_lock/screen_wake_lock_service.dart';
 import '../ui/home/widgets/home_screen.dart';
 import '../ui/home/view_models/home_viewmodel.dart';
 import '../ui/inventory/widgets/inventory_screen.dart';
+import '../ui/inventory/view_models/inventory_viewmodel.dart';
 import '../ui/recipe_details/view_models/recipe_details_viewmodel.dart';
 import '../ui/recipe_details/widgets/recipe_details_screen.dart';
 import '../ui/search/widgets/search_screen.dart';
@@ -66,7 +67,12 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: Routes.inventory,
           builder: (context, state) {
-            return const InventoryScreen();
+            return ChangeNotifierProvider(
+              create: (context) => InventoryViewModel(
+                repository: context.read<PantryRepository>(),
+              ),
+              child: const InventoryScreen(),
+            );
           },
         ),
         GoRoute(

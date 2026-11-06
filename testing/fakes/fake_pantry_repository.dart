@@ -4,6 +4,8 @@ import 'package:o_que_comer_app/domain/models/pantry_item.dart';
 /// Repositório falso para testes de ViewModel: registra o que foi salvo.
 class FakePantryRepository implements PantryRepository {
   final scans = <List<String>>[];
+  final items = <PantryItem>[];
+  final removedIds = <String>[];
   Exception? error;
 
   @override
@@ -14,5 +16,17 @@ class FakePantryRepository implements PantryRepository {
   }
 
   @override
-  Future<List<PantryItem>> getItems() async => const [];
+  Future<List<PantryItem>> getItems() async {
+    final e = error;
+    if (e != null) throw e;
+    return List.unmodifiable(items);
+  }
+
+  @override
+  Future<void> remove(String id) async {
+    final e = error;
+    if (e != null) throw e;
+    removedIds.add(id);
+    items.removeWhere((item) => item.id == id);
+  }
 }

@@ -24,6 +24,9 @@ class _FailingBox implements PantryBox {
   Object? get(String key) => null;
 
   @override
+  Future<void> delete(String key) async => throw StateError('exclusão');
+
+  @override
   Future<void> putAll(Map<String, Map<String, Object?>> entries) async =>
       throw StateError('escrita');
 }
@@ -131,6 +134,15 @@ void main() {
 
     final items = await repository.getItems();
     expect(items.single.name, 'Tomate');
+  });
+
+  test('remove o alimento do armazenamento', () async {
+    await repository.saveScanned(['Tomate', 'Ovo']);
+
+    await repository.remove('tomate');
+
+    expect((await repository.getItems()).map((item) => item.name), ['Ovo']);
+    expect(box.get('tomate'), isNull);
   });
 
   test('registro ilegível na leitura é reportado e propagado', () async {
