@@ -15,7 +15,7 @@ class HandsFreeCommandsHelp extends StatelessWidget {
         child: Text(
           '“Continuar” lê o passo desde o início. '
           '“Parar” pausa a leitura. “Próximo passo” e “passo anterior” '
-          'mudam o passo. “Sair” ou “sair do modo” encerram o modo.\n\n'
+          'mudam o passo. “Sair” ou “cancelar hands-free” encerram o modo.\n\n'
           'Fale quando o indicador mostrar “Ouvindo”. Durante a leitura, '
           'use o botão para pausar; a escuta volta ao final.',
         ),

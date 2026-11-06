@@ -246,7 +246,7 @@ void main() {
     },
   );
 
-  for (final phrase in ['sair', 'sair do modo']) {
+  for (final phrase in ['sair', 'sair do modo', 'cancelar hands-free']) {
     test('voice "$phrase" stops the mode', () async {
       await vm.load();
       capture.emit(phrase);

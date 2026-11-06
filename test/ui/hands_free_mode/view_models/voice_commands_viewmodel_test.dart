@@ -103,7 +103,7 @@ void main() {
     expect(commands, [VoiceCommand.pause, VoiceCommand.resume]);
   });
 
-  for (final phrase in ['sair', 'sair do modo']) {
+  for (final phrase in ['sair', 'sair do modo', 'cancelar hands-free']) {
     voiceTest('$phrase emite a intenção e encerra escuta', (tester) async {
       await vm.start();
       engine.result(phrase);
