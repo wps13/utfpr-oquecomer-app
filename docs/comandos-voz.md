@@ -35,12 +35,13 @@ interrompe a captura. Voltar exige uma nova ativação explícita.
 | `nextStep` | próximo passo, próximo, avançar, passo seguinte |
 | `previousStep` | passo anterior, anterior, voltar, retroceder |
 | `exit` | sair, saia, fechar |
-| `exitMode` | sair do modo, sair do modo mãos livres, encerrar modo |
+| `exitMode` | sair do modo, sair do modo mãos livres, cancelar hands-free, encerrar modo |
 
 Caixa, acentuação (inclusive Unicode decomposto), pontuação e espaços repetidos
 são normalizados. A frase inteira precisa corresponder a um alias: `não parar`,
 `continuar cozinhando o arroz` ou dois comandos na mesma frase são ignorados.
-`sair` e `sair do modo` permanecem intenções distintas. Ambos encerram a captura
+`sair` e os comandos de saída do modo, como `sair do modo` e `cancelar
+hands-free`, encerram a captura
 na ViewModel; decidir a navegação é responsabilidade do consumidor.
 
 `parar` emite `pause`, mas mantém o microfone disponível para um futuro
