@@ -36,6 +36,13 @@ somente o detalhe de uma receita.
 `VoiceCommandsViewModel` para interpretar o reconhecimento. A tela cuida da
 navegação, sem lógica de áudio no widget.
 
+Os widgets ficam em arquivos separados: `HandsFreeModeScreen` concentra navegação
+e ciclo de vida; `HandsFreeModeBody` escolhe os estados de carregamento, erro e
+conteúdo; `HandsFreeRecipeSteps` compõe o cartão do passo, o indicador de voz e a
+ajuda de comandos. `HandsFreeStepCard` e `HandsFreeVoiceStatus` recebem dados e
+callbacks, permitindo testes isolados de apresentação e interação sem montar
+ViewModels, Providers ou serviços nativos.
+
 A ponte de leitura mantém `VoiceCaptureService.duringPlayback` aberto até a
 conclusão real do áudio, observando `SpeechService.status`: `speak()` confirma
 somente o início. Leituras substituídas e canceladas liberam seus Futures;
@@ -101,8 +108,8 @@ Os testes simulados não substituem a validação de áudio real no Android e no
 
 ### Verificações desta implementação
 
-- Suíte completa na base atualizada da develop: 456 testes aprovados,
-  cobertura global de 89,07%.
+- Suíte completa na base atualizada da develop: 461 testes aprovados,
+  cobertura global de 89,13%.
 - Análise estática sem avisos e formatação conferida.
 - Android ARM64: APK debug compilado.
 - iOS: release sem assinatura compilado com Xcode 27.1 e CocoaPods 1.17.0.
