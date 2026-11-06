@@ -13,7 +13,8 @@ somente o detalhe de uma receita.
   seu texto. Os limites não retornam ao início nem saem da receita.
 - **Parar / pausar** mantém o passo atual. **Continuar** relê desde o começo;
   a APP-42 não oferece retomada exata no ponto da pausa.
-- **Sair / sair do modo** encerra captura e leitura e volta à tela anterior.
+- **Sair / sair do modo / cancelar hands-free** encerra captura e leitura e
+  volta à tela anterior.
 - Frases fora da lista de comandos são ignoradas. A normalização e os sinônimos
   seguem o [interpretador da APP-43](comandos-voz.md).
 - **Durante a leitura, o microfone fica suspenso** para evitar que a voz do app
@@ -97,7 +98,8 @@ SwiftPM. O Podfile está versionado. Consulte também os guias de
 5. Durante uma leitura, toque em **Pausar leitura**. Confira a retomada da escuta.
    Diga continuar e confirme que o passo recomeça.
 6. Diga uma frase que não seja comando; o passo deve permanecer o mesmo.
-7. Diga **sair do modo**. Confira a volta ao detalhe e o fim do uso do microfone.
+7. Diga **sair**, **sair do modo** ou **cancelar hands-free**. Confira a volta
+   ao detalhe e o fim do uso do microfone.
 8. Entre novamente; teste Voltar, segundo plano e bloqueio durante uma leitura.
    Ao retornar, a voz deve ficar desativada até nova ativação.
 9. Negue a permissão; confira a explicação e os controles manuais. Com recusa
