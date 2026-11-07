@@ -4,6 +4,20 @@
 *.pyc
 *.swp
 .DS_Store
+firebase-debug.log*
+firebase-debug.*.log
+.firebase/
+# Configuração local de Firebase/Gemini (exemplos vazios são versionados).
+.env
+.env.*
+!.env.example
+config/*.local.json
+config/firebase.generated.local.dart
+# Fotos locais para validação manual do Gemini.
+/local/gemini/
+# Credenciais de CLI/contas de serviço não devem entrar no repositório.
+**/*service-account*.json
+**/*serviceAccount*.json
 .atom/
 .build/
 .buildlog/
@@ -11,6 +25,7 @@
 .svn/
 .swiftpm/
 migrate_working_dir/
+.vscode/
 
 # IntelliJ related
 *.iml
@@ -46,3 +61,7 @@ app.*.map.json
 
 # Widget Preview related
 .widget_preview/
+
+# Segredos / configuração local
+env.json
+.env

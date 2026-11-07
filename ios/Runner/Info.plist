@@ -7,7 +7,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>O Que Comer App</string>
+	<string>O Que Comer</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -15,7 +15,7 @@
 	<key>CFBundleInfoDictionaryVersion</key>
 	<string>6.0</string>
 	<key>CFBundleName</key>
-	<string>o_que_comer_app</string>
+	<string>O Que Comer</string>
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
@@ -26,6 +26,18 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>FirebaseCrashlyticsCollectionEnabled</key>
+	<string>$(CRASHLYTICS_COLLECTION_ENABLED)</string>
+	<key>NSCameraUsageDescription</key>
+	<string>O Que Comer App precisa acessar a câmera para tirar fotos quando você usar esse recurso.</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>O Que Comer App usa sua localização para encontrar opções de comida perto de você, somente enquanto o aplicativo está em uso.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>O Que Comer App precisa acessar o microfone para captar sua voz quando você usar os recursos de áudio.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>O Que Comer App usa o reconhecimento de fala para entender seus comandos no modo mãos livres.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>O Que Comer App precisa acessar suas fotos para que você escolha imagens para usar no aplicativo.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
