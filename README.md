@@ -2,6 +2,38 @@
 
 Projeto Flutter para o app 'O que Comer'.
 
+## Sobre o app
+
+O **O que Comer** é um aplicativo para jovens adultos de 20 a 40 anos, com
+rotinas corridas, que reduz a fadiga de decisão e o desperdício de alimentos ao
+identificar por foto os ingredientes disponíveis em casa e usar IA para sugerir
+receitas práticas, adaptadas à região e à rotina do usuário. Assim, facilita a
+escolha do que preparar, ajuda a economizar com delivery, evita que alimentos
+estraguem e promove mais autonomia na cozinha.
+
+### Principais recursos
+
+- **Sugestões com IA:** identifica ingredientes por foto e gera receitas a
+  partir do que o usuário tem disponível.
+- **Catálogo de receitas:** oferece categorias, busca e favoritos para
+  encontrar e guardar preparos.
+- **Sugestões contextualizadas:** adapta as recomendações à região do usuário.
+- **Despensa:** mantém o histórico dos alimentos escaneados.
+- **Preparo guiado:** acompanha a receita passo a passo com leitura e comandos
+  por voz, permitindo cozinhar com as mãos livres.
+
+### Imagens do app
+
+| Início e catálogo | Busca e favoritos |
+| --- | --- |
+| ![Início e catálogo do app](docs/screenshots/inicio-catalogo.jpg) | ![Busca e favoritos do app](docs/screenshots/busca-favoritos.jpg) |
+
+| Receita com IA | Detalhes e modo mãos livres |
+| --- | --- |
+| ![Fluxo de receita com IA](docs/screenshots/receita-com-ia.jpg) | ![Detalhes da receita e modo mãos livres](docs/screenshots/receita-maos-livres.jpg) |
+
+## Documentações
+
 Configuração, uso e validação do [Firebase e Crashlytics (APP-19)](docs/firebase-crashlytics.md).
 
 Configuração, contratos e testes da [integração Gemini (APP-31)](docs/gemini.md).
